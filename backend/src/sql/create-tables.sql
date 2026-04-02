@@ -1,0 +1,20 @@
+PRAGMA foreign_keys = ON;
+
+BEGIN TRANSACTION;
+
+CREATE TABLE IF NOT EXISTS images (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  content_type TEXT NOT NULL,
+  image_data BLOB NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS products (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  price REAL NOT NULL,
+  image_id INTEGER,
+  FOREIGN KEY (image_id) REFERENCES images (id) ON DELETE SET NULL
+);
+
+COMMIT;

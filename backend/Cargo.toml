@@ -1,0 +1,15 @@
+[package]
+name = "backend"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+libsql = { version = "0.9.30", features = ["remote"] }
+tokio = {version= "1.49.0" , features= ["rt-multi-thread", "signal"]}
+axum = {version="0.8.8", features=["multipart"]}
+serde_json = "1.0.149"
+envy = "0.4.2"
+serde ={ version = "1.0", features = ["derive"] }
+image = { version = "0.25.10", default-features = false, features = ["webp", "jpeg", "png"] }
+tower-http = { version = "0.6.8", features = ["cors"] }
+
