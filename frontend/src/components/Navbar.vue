@@ -11,14 +11,14 @@
                 </div>
                 <ul tabindex="-1"
                     class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-                    <li><a>Homepage</a></li>
-                    <li><a>Portfolio</a></li>
-                    <li><a>About</a></li>
+                    <li><RouterLink :to="{name: 'catalog'}">Catalogo</RouterLink></li>
+                    <li><RouterLink :to="{name: 'productCreate'}">Agregar producto</RouterLink></li>
+                    <li><a>Sobre nosotros</a></li>
                 </ul>
             </div>
         </div>
         <div class="navbar-center">
-            <a class="btn btn-ghost font-['Noto_Serif'] font-bold text-xl"> {{store_name }}</a>
+            <RouterLink :to="{name: 'catalog'}" class="btn btn-ghost font-['Noto_Serif'] font-bold text-xl"> {{store_name }}</RouterLink>
         </div>
         <div class="navbar-end">
             <button class="btn btn-ghost btn-circle">

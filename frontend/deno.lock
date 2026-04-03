@@ -5,6 +5,7 @@
     "npm:@types/node@^24.12.0": "24.12.0",
     "npm:@vitejs/plugin-vue@^6.0.5": "6.0.5_vite@8.0.3__@types+node@24.12.0__@emnapi+core@1.9.1__@emnapi+runtime@1.9.1_vue@3.5.31__typescript@5.9.3_@emnapi+core@1.9.1_@emnapi+runtime@1.9.1_@types+node@24.12.0_typescript@5.9.3",
     "npm:@vue/tsconfig@0.9": "0.9.1_typescript@5.9.3_vue@3.5.31__typescript@5.9.3",
+    "npm:@vueuse/core@^14.2.1": "14.2.1_vue@3.5.31__typescript@5.9.3",
     "npm:daisyui@^5.5.19": "5.5.19",
     "npm:tailwindcss@^4.2.2": "4.2.2",
     "npm:typescript@~5.9.3": "5.9.3",
@@ -284,6 +285,9 @@
         "undici-types"
       ]
     },
+    "@types/web-bluetooth@0.0.21": {
+      "integrity": "sha512-oIQLCGWtcFZy2JW77j9k8nHzAOpqMHLQejDA48XXMWH6tjCQHz5RCFz1bzsmROyL6PUm+LLnUiI4BCn221inxA=="
+    },
     "@vitejs/plugin-vue@6.0.5_vite@8.0.3__@types+node@24.12.0__@emnapi+core@1.9.1__@emnapi+runtime@1.9.1_vue@3.5.31__typescript@5.9.3_@emnapi+core@1.9.1_@emnapi+runtime@1.9.1_@types+node@24.12.0_typescript@5.9.3": {
       "integrity": "sha512-bL3AxKuQySfk1iGcBsQnoRVexTPJq0Z/ixFVM8OhVJAP6ZXXXLtM7NFKWhLl30Kg7uTBqIaPXbh+nuQCuBDedg==",
       "dependencies": [
@@ -403,6 +407,24 @@
       ],
       "optionalPeers": [
         "typescript",
+        "vue"
+      ]
+    },
+    "@vueuse/core@14.2.1_vue@3.5.31__typescript@5.9.3": {
+      "integrity": "sha512-3vwDzV+GDUNpdegRY6kzpLm4Igptq+GA0QkJ3W61Iv27YWwW/ufSlOfgQIpN6FZRMG0mkaz4gglJRtq5SeJyIQ==",
+      "dependencies": [
+        "@types/web-bluetooth",
+        "@vueuse/metadata",
+        "@vueuse/shared",
+        "vue"
+      ]
+    },
+    "@vueuse/metadata@14.2.1": {
+      "integrity": "sha512-1ButlVtj5Sb/HDtIy1HFr1VqCP4G6Ypqt5MAo0lCgjokrk2mvQKsK2uuy0vqu/Ks+sHfuHo0B9Y9jn9xKdjZsw=="
+    },
+    "@vueuse/shared@14.2.1_vue@3.5.31__typescript@5.9.3": {
+      "integrity": "sha512-shTJncjV9JTI4oVNyF1FQonetYAiTBd+Qj7cY89SWbXSkx7gyhrgtEdF2ZAVWS1S3SHlaROO6F2IesJxQEkZBw==",
+      "dependencies": [
         "vue"
       ]
     },
@@ -669,6 +691,7 @@
         "npm:@types/node@^24.12.0",
         "npm:@vitejs/plugin-vue@^6.0.5",
         "npm:@vue/tsconfig@0.9",
+        "npm:@vueuse/core@^14.2.1",
         "npm:daisyui@^5.5.19",
         "npm:tailwindcss@^4.2.2",
         "npm:typescript@~5.9.3",

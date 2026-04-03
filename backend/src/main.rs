@@ -98,7 +98,7 @@ pub struct ProductDto {
     pub title: String,
     pub description: String,
     pub price: f64,
-    pub image_id: i64,
+    pub image_id: Option<i64>,
 }
 
 impl TryFrom<&Row> for ProductDto {
@@ -113,6 +113,11 @@ impl TryFrom<&Row> for ProductDto {
             image_id: row.get(4)?,
         })
     }
+}
+
+#[derive(Serialize)]
+pub struct CreateResponse {
+    pub id: i64,
 }
 
 #[tokio::main]
@@ -209,27 +214,22 @@ async fn get_product_handler(
 async fn create_product_handler(
     State(state): State<AppState>,
     Json(payload): Json<CreateProduct>,
-) -> impl IntoResponse {
-    println!(
-        "Received product: {} with description {} and price {}",
-        payload.title, payload.description, payload.price
-    );
-
-    let query_result = state
+) -> Result<impl IntoResponse, AppError> {
+    let mut rows = state
         .db_conn
-        .execute(
-            "INSERT INTO products (title, description,  price ) VALUES (?1, ?2, ?3)",
+        .query(
+            "INSERT INTO products (title, description,  price ) VALUES (?1, ?2, ?3) RETURNING id",
             params![payload.title, payload.description, payload.price],
         )
-        .await;
+        .await?;
 
-    match query_result {
-        Ok(_) => StatusCode::CREATED,
-        Err(err) => {
-            eprintln!("Database error: {}", err);
-            StatusCode::INTERNAL_SERVER_ERROR
-        }
-    }
+    let row = rows.next().await?.ok_or(AppError::InsertFailed)?;
+    let new_product_id: i64 = row.get(0)?;
+
+    Ok((
+        StatusCode::CREATED,
+        Json(CreateResponse { id: new_product_id }),
+    ))
 }
 
 pub async fn get_image_handler(
@@ -263,7 +263,7 @@ pub async fn upload_image_handler(
     State(state): State<AppState>,
     Path(product_id): Path<u32>,
     mut multipart: Multipart,
-) -> Result<StatusCode, AppError> {
+) -> Result<impl IntoResponse, AppError> {
     let field = multipart.next_field().await?.ok_or(AppError::MissingFile)?;
     let content_type = "image/webp";
     let image_bytes = utils::convert_to_webp(field.bytes().await?).await?;
@@ -309,5 +309,8 @@ pub async fn upload_image_handler(
 
     tx.commit().await?;
 
-    Ok(StatusCode::CREATED)
+    Ok((
+        StatusCode::CREATED,
+        Json(CreateResponse { id: new_image_id }),
+    ))
 }

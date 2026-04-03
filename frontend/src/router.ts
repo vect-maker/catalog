@@ -1,8 +1,8 @@
 import { createMemoryHistory, createRouter } from 'vue-router'
-import Catalog from './views/Catalog.vue'
 
 const routes = [
-  { path: '/', component: Catalog },
+  { path: '/', name: "catalog", component: () =>  import('./views/Catalog.vue') },
+  { path: '/products/create', name: "productCreate", component: () =>  import('./views/CreateProduct.vue') },
   
 ]
 

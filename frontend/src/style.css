@@ -3,3 +3,11 @@
 @plugin "daisyui" {
   themes: light --default;
 }
+
+input:focus, 
+textarea:focus, 
+select:focus, 
+button:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}

@@ -3,7 +3,7 @@
 
   <Navbar class="fixed top-0 w-full z-50 "></Navbar>
   
-  <RouterView></RouterView>
+  <RouterView class="mt-22"></RouterView>
   <BottomNav></BottomNav>
 
 </template>
