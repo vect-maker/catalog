@@ -14,6 +14,7 @@ run-backend:
     -e DB_TOKEN=$DB_TOKEN \
     -e DB_URL=$DB_URL \
     -e CLIENT_URL=$CLIENT_URL \
+    -e SECRET_KEY=$SECRET_KEY \
     -p 8080:80 \
     -w /workspace \
     rust:alpine \

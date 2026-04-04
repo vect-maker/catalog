@@ -1,41 +1,37 @@
 use axum::{Router, http::StatusCode, routing::get};
-
 use libsql::Builder;
-
-use serde::Deserialize;
 use tokio::net::TcpListener;
 
 mod contracts;
 mod cors;
+mod env;
 mod error;
+mod extractors;
 mod routers;
 mod shutdown;
 mod utils;
 
 use crate::cors::get_cors_layer;
+use crate::env::get_env;
 use crate::error::AppError;
-
-#[derive(Clone, Deserialize)]
-pub struct AppEnv {
-    pub db_url: String,
-    pub db_token: String,
-    pub client_url: String,
-}
 
 #[derive(Clone)]
 pub struct AppState {
     pub db_conn: libsql::Connection,
+    pub jwt_secret: String,
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // get app env
-    let app_env = envy::from_env::<AppEnv>().expect("FATAL: Missing required ENV variables");
+    let app_env = get_env();
     // create datbase
     let db = Builder::new_remote(app_env.db_url, app_env.db_token)
         .build()
         .await?;
     let db_conn = db.connect()?;
+
+    db_conn.execute("PRAGMA foreign_keys = ON;", ()).await?;
 
     match db_conn
         .execute_batch(include_str!("sql/create-tables.sql"))
@@ -46,14 +42,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // build app state
-    let app_state = AppState { db_conn };
+    let app_state = AppState {
+        db_conn,
+        jwt_secret: app_env.secret_key.clone(),
+    };
 
     // compose app
     let app = Router::new()
         .route("/health/live", get(health_check))
         .route("/health/ready", get(health_check))
-        .merge(routers::products::use_routes())
-        .merge(routers::images::use_routes())
+        .nest("/products", routers::products::use_routes())
+        .nest("/images", routers::images::use_routes())
+        .nest("/users", routers::users::use_routes())
         .with_state(app_state)
         .layer(get_cors_layer(&app_env.client_url));
 

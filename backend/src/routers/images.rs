@@ -37,5 +37,5 @@ pub async fn get_image_handler(
 }
 
 pub fn use_routes() -> Router<AppState> {
-    Router::new().route("/images/{image_id}", get(get_image_handler))
+    Router::new().route("/{image_id}", get(get_image_handler))
 }

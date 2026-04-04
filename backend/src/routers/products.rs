@@ -1,4 +1,4 @@
-use crate::utils;
+use crate::{extractors::AuthUser, utils};
 use axum::{
     Json, Router,
     extract::{Multipart, Path, State},
@@ -55,6 +55,7 @@ async fn get_product_handler(
 }
 
 async fn create_product_handler(
+    _user: AuthUser,
     State(state): State<AppState>,
     Json(payload): Json<CreateProductDto>,
 ) -> Result<impl IntoResponse, AppError> {
@@ -76,6 +77,7 @@ async fn create_product_handler(
 }
 
 pub async fn upload_image_handler(
+    _user: AuthUser,
     State(state): State<AppState>,
     Path(product_id): Path<u32>,
     mut multipart: Multipart,
@@ -133,8 +135,8 @@ pub async fn upload_image_handler(
 
 pub fn use_routes() -> Router<AppState> {
     Router::new()
-        .route("/products", get(get_products_handler))
-        .route("/products", post(create_product_handler))
-        .route("/products/{product_id}", get(get_product_handler))
-        .route("/products/{product_id}/images", post(upload_image_handler))
+        .route("/", get(get_products_handler))
+        .route("/", post(create_product_handler))
+        .route("/{product_id}", get(get_product_handler))
+        .route("/{product_id}/images", post(upload_image_handler))
 }

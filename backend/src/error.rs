@@ -12,6 +12,8 @@ pub enum AppError {
     EncodingFailed,
     ThreadPanic,
     InvalidImageFormat,
+    InvalidCredentials,
+    InternalError,
 }
 
 impl IntoResponse for AppError {
@@ -33,11 +35,13 @@ impl IntoResponse for AppError {
             AppError::ProductNotFound => (StatusCode::NOT_FOUND, "Could not find the product"),
             AppError::ImageNotFound => (StatusCode::NOT_FOUND, "Could not find the image"),
             AppError::ThreadPanic => (StatusCode::INTERNAL_SERVER_ERROR, "Internal error"),
+            AppError::InternalError => (StatusCode::INTERNAL_SERVER_ERROR, "Internal error"),
             AppError::EncodingFailed => (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "Could not encode the image",
             ),
             AppError::InvalidImageFormat => (StatusCode::BAD_REQUEST, "Invalid image format"),
+            AppError::InvalidCredentials => (StatusCode::UNAUTHORIZED, "Invalid credentials"),
         };
 
         let body = Json(json!({ "error": error_message }));
