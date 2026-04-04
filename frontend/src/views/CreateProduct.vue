@@ -4,7 +4,7 @@
             <p class="text-3xl font-bold mb-4">Agregar Producto</p>
             <form class="fieldset bg-base-200 border-base-300 rounded-box  border p-4" @submit.prevent
                 @submit="createProduct">
-                <DropZone @file-change="handleFileChange"></DropZone>
+                <DropZone @files-changed="handleFilesChange"></DropZone>
                 <label class="fieldset">
                     <label class="label">Titulo</label>
                     <input v-model="title" type="text" class="input validator w-full" required
@@ -43,18 +43,26 @@ const cropSizeLimit = 1024 * 1024
 const title = ref("");
 const price = ref(0);
 const description = ref("");
-const productImage = ref<File | null>(null)
+const productImages = ref<File[]>([]);
 
-const handleFileChange = (file: File | null) => {
-    if (file && file.size > cropSizeLimit) {
-        console.error("La imagen es muy grande: maximo 1mb")
-        return
-    }
-    productImage.value = file
+const handleFilesChange = (files: File[]) => {
+
+    productImages.value = files.filter((f) => {
+        if ( f.size > cropSizeLimit) {
+            console.error("La imagen es muy grande: maximo 1mb")
+            return false
+        }
+
+        return true
+    })
+
 }
 
 const createProduct = async () => {
-    if (!productImage.value) return 
+    if (productImages.value.length < 1) {
+        alert("Debe de incluir almenos una imagen")
+        return
+    }
 
     try {
         const product = await createProductRequest({
@@ -62,11 +70,12 @@ const createProduct = async () => {
             price: price.value,
             description: description.value
         })
-
-        const image = await addImageToProduct(product.id, productImage.value);
-
-        console.log(image)
         
+        productImages.value.forEach(async (imageFile) => {
+            const image = await addImageToProduct(product.id, imageFile);
+            console.log(image)
+        });    
+
     } catch (error) {
         console.error(error)
     }

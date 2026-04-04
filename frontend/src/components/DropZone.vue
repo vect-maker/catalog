@@ -1,62 +1,68 @@
 <template>
     <label ref="dropZoneRef"
-        class="flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-base-300 bg-base-200"
-        :class="{ 'hover:bg-base-300 transition-colors': isOverDropZone }">
-        <div v-if="!previewUrl" class="flex flex-col items-center justify-center pb-6 pt-5 p-2">
+        class="flex min-h-64 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-base-300 bg-base-200 p-4 overflow-hidden relative"
+        :class="{ 'border-primary bg-base-300 transition-colors': isOverDropZone }">
+        
+        <div v-if="!previews.length" class="flex flex-col items-center justify-center pb-6 pt-5 p-2 pointer-events-none">
             <p class="mb-2 text-sm text-base-content/70">
-                <span class="font-semibold text-center">Haz click para cargar imagen</span> 
+                <span class="font-semibold text-center">Haz click para cargar imágenes</span> 
                 o arrastra y suelta
             </p>
-            <p class="text-xs text-base-content/60">PNG o JPG</p>
-        </div>
-        <div v-else class="h-full w-full flex items-center justify-center">
-            <img :src="previewUrl" alt="preview" class="max-h-full max-w-full object-contain rounded" />
+            <p class="text-xs text-base-content/60">PNG, JPG, WEBP</p>
         </div>
 
-        <input  id="dropzone-file" type="file" accept="image/png,image/jpeg,image/webp" class="hidden"
+        <div v-else class="grid grid-cols-3 sm:grid-cols-4 gap-4 w-full h-full overflow-y-auto pointer-events-none">
+            <div v-for="url in previews" :key="url" class="relative aspect-square">
+                <img :src="url" alt="preview" class="w-full h-full object-cover rounded shadow-md" />
+            </div>
+        </div>
+
+        <input id="dropzone-file" type="file" multiple accept="image/png,image/jpeg,image/webp" class="hidden"
             @change="onFileChange" />
     </label>
 </template>
+
 <script setup lang="ts">
 import { useDropZone } from '@vueuse/core'
-import { onBeforeUnmount, ref, watch } from 'vue'
+import { onBeforeUnmount, ref } from 'vue'
 
 const emit = defineEmits<{
-      (e: 'fileChange', payload: File | null): void
+      (e: 'filesChanged', payload: File[]): void
 }>()
 
-const image = ref<File | null>(null)
 const dropZoneRef = ref<HTMLDivElement>()
-const previewUrl = ref<string | null>(null)
+const previews = ref<string[]>([]) 
 
-watch(image, (newVal) => {
-    if (!newVal) return
-    if (previewUrl.value) URL.revokeObjectURL(previewUrl.value)
-    previewUrl.value = URL.createObjectURL(newVal)
+const processFiles = (rawFiles: File[] | FileList | null) => {
+    if (!rawFiles) return
 
-    emit('fileChange', image.value)
-})
+    const validFiles = Array.from(rawFiles).filter(file => file.type.startsWith('image/'))
+    if (!validFiles.length) return
+
+    cleanupUrls()
+
+    previews.value = validFiles.map(file => URL.createObjectURL(file))
+    
+    emit('filesChanged', validFiles)
+}
+
+const cleanupUrls = () => {
+    previews.value.forEach(url => URL.revokeObjectURL(url))
+    previews.value = []
+}
 
 const onFileChange = (event: Event) => {
     const target = event.target as HTMLInputElement
-    if (target.files?.length) {
-        image.value = target.files[0]
-    }
+    processFiles(target.files)
+    target.value = '' 
 }
 
 const { isOverDropZone } = useDropZone(dropZoneRef, {
-    onDrop: (files: File[] | null) => {
-        if (files?.length) {
-            image.value = files[0]
-        }
-    },
-    dataTypes: ["image/png,image/jpeg,image/webp"],
-    multiple: false,
+    onDrop: processFiles,
+    dataTypes: ['image/png', 'image/jpeg', 'image/webp'], 
+    multiple: true, 
     preventDefaultForUnhandled: false,
 })
 
-onBeforeUnmount(() => {
-  if (previewUrl.value) URL.revokeObjectURL(previewUrl.value)
-})
-
+onBeforeUnmount(cleanupUrls)
 </script>

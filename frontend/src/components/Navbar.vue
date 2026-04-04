@@ -12,7 +12,9 @@
                 <ul tabindex="-1"
                     class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
                     <li><RouterLink :to="{name: 'catalog'}">Catalogo</RouterLink></li>
-                    <li><RouterLink :to="{name: 'productCreate'}">Agregar producto</RouterLink></li>
+                    <li v-if="authStore.isAuthenticated"><RouterLink :to="{name: 'productCreate'}">Agregar producto</RouterLink></li>
+                    <li v-if="!authStore.isAuthenticated"><RouterLink :to="{name: 'login'}">Iniciar session</RouterLink></li>
+                     <li v-else><button @click="logout">Cerrar session</button></li>
                     <li><a>Sobre nosotros</a></li>
                 </ul>
             </div>
@@ -43,7 +45,18 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '../stores/useAuthStore';
+
 
 const store_name = import.meta.env.VITE_STORE_NAME;
+
+const authStore = useAuthStore()
+const router = useRouter()
+
+const logout = ()=>{
+    authStore.logout();
+    router.push({"name": "catalog"})
+}
 
 </script>

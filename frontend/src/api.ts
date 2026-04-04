@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { useAuthStore } from './stores/useAuthStore';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -7,7 +8,7 @@ export const ProductSchema = z.object({
   title: z.string(),
   description: z.string(),
   price: z.number(),
-  image_id: z.number().nullable()
+  images: z.array(z.number())
 });
 
 export type Product = z.infer<typeof ProductSchema>;
@@ -26,7 +27,17 @@ export const CreateResponseSchema = z.object({
   id: z.number()
 })
 
+export const AuthenticateUserSchema = z.object({
+  name: z.string(),
+  password: z.string()
+})
 
+export const AuthenticationToken = z.object({
+  token: z.string()
+})
+
+
+// handlers 
 export const getImageUrl = (imageId: number) => {
   return `${API_BASE_URL}/images/${imageId}`
 }
@@ -44,6 +55,8 @@ export async function apiFetch<T>(path: string, schema: z.ZodSchema<T>): Promise
 
 export const createProduct = async (formData: unknown) => {
   const result = ProductCreateSchema.safeParse(formData);
+  const authStore = useAuthStore();
+
 
   if (!result.success) {
     console.error("Validation failed:", z.prettifyError(result.error));
@@ -54,6 +67,7 @@ export const createProduct = async (formData: unknown) => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${authStore.token}`
     },
     body: JSON.stringify(result.data),
   });
@@ -68,11 +82,15 @@ export const createProduct = async (formData: unknown) => {
 
 export const addImageToProduct = async (product_id: number, file: File) => {
   const formData = new FormData();
+  const authStore = useAuthStore();
 
   formData.append('image', file);
 
   const response = await fetch(`${API_BASE_URL}/products/${product_id}/images`, {
     method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${authStore.token}`
+    },
     body: formData,
   });
 
@@ -80,4 +98,28 @@ export const addImageToProduct = async (product_id: number, file: File) => {
 
   return CreateResponseSchema.parse(await response.json())
 
+}
+
+export const authenticate = async (formData: unknown) => {
+  const payload = AuthenticateUserSchema.safeParse(formData);
+
+  if (!payload.success) {
+    console.error("Validation failed:", z.prettifyError(payload.error));
+    throw new Error(`Form data is not correct`)
+  }
+
+  const response = await fetch(`${API_BASE_URL}/users/authenticate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload.data),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Server error: ${response.status}`);
+  }
+
+
+  return AuthenticationToken.parse(await response.json())
 }
