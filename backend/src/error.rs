@@ -1,10 +1,15 @@
-use axum::{Json, http::StatusCode, response::IntoResponse, response::Response};
+use axum::{
+    Json,
+    http::StatusCode,
+    response::{IntoResponse, Response},
+};
 
 use serde_json::json;
 
 pub enum AppError {
     Database(libsql::Error),
     Multipart(axum::extract::multipart::MultipartError),
+    JWTError(jsonwebtoken::errors::Error),
     InsertFailed,
     MissingFile,
     ProductNotFound,
@@ -42,6 +47,10 @@ impl IntoResponse for AppError {
             ),
             AppError::InvalidImageFormat => (StatusCode::BAD_REQUEST, "Invalid image format"),
             AppError::InvalidCredentials => (StatusCode::UNAUTHORIZED, "Invalid credentials"),
+            AppError::JWTError(err) => {
+                eprintln!("--> [JWT ERROR] {}", err);
+                (StatusCode::UNAUTHORIZED, "Invalid credentials")
+            }
         };
 
         let body = Json(json!({ "error": error_message }));
@@ -57,5 +66,11 @@ impl From<libsql::Error> for AppError {
 impl From<axum::extract::multipart::MultipartError> for AppError {
     fn from(inner: axum::extract::multipart::MultipartError) -> Self {
         AppError::Multipart(inner)
+    }
+}
+
+impl From<jsonwebtoken::errors::Error> for AppError {
+    fn from(inner: jsonwebtoken::errors::Error) -> Self {
+        AppError::JWTError(inner)
     }
 }

@@ -8,7 +8,7 @@ use crate::utils::verify_jwt;
 
 #[derive(Clone)]
 pub struct AuthUser {
-    pub user_id: u64,
+    pub id: u64,
 }
 
 impl FromRequestParts<AppState> for AuthUser {
@@ -25,9 +25,7 @@ impl FromRequestParts<AppState> for AuthUser {
 
         if let Some(token) = auth_header.and_then(|h| h.strip_prefix("Bearer ")) {
             match verify_jwt(token, &state.jwt_secret) {
-                Ok(claims) => Ok(AuthUser {
-                    user_id: claims.sub,
-                }),
+                Ok(claims) => Ok(AuthUser { id: claims.sub }),
                 Err(_) => Err(StatusCode::UNAUTHORIZED),
             }
         } else {

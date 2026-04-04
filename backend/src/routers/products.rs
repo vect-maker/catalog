@@ -22,7 +22,7 @@ async fn get_products_handler(
     let mut rows = state
         .db_conn
         .query(
-            "SELECT id, title, description, price, image_id FROM products LIMIT 40",
+            "SELECT id, title, description, price, COALESCE((SELECT json_group_array(image_id) FROM product_images WHERE product_id = p.id), '[]') AS image_ids FROM products AS p LIMIT 20",
             (),
         )
         .await?;
@@ -43,7 +43,7 @@ async fn get_product_handler(
     let mut rows = state
         .db_conn
         .query(
-            "SELECT id, title, description, price, image_id FROM products WHERE id = ?1 LIMIT 1",
+            "SELECT id, title, description, price, COALESCE((SELECT json_group_array(image_id) FROM product_images WHERE product_id = p.id), '[]') AS image_ids FROM products AS p WHERE id = ?1 LIMIT 1",
             params![product_id],
         )
         .await?;
@@ -55,15 +55,15 @@ async fn get_product_handler(
 }
 
 async fn create_product_handler(
-    _user: AuthUser,
+    user: AuthUser,
     State(state): State<AppState>,
     Json(payload): Json<CreateProductDto>,
 ) -> Result<impl IntoResponse, AppError> {
     let mut rows = state
         .db_conn
         .query(
-            "INSERT INTO products (title, description,  price ) VALUES (?1, ?2, ?3) RETURNING id",
-            params![payload.title, payload.description, payload.price],
+            "INSERT INTO products (title, description,  price,  published_by ) VALUES (?1, ?2, ?3, ?4) RETURNING id",
+            params![payload.title, payload.description, payload.price, user.id],
         )
         .await?;
 
@@ -77,7 +77,7 @@ async fn create_product_handler(
 }
 
 pub async fn upload_image_handler(
-    _user: AuthUser,
+    user: AuthUser,
     State(state): State<AppState>,
     Path(product_id): Path<u32>,
     mut multipart: Multipart,
@@ -88,49 +88,27 @@ pub async fn upload_image_handler(
 
     let tx = state.db_conn.transaction().await?;
 
-    // remove current image data
-    let mut rows = state
-        .db_conn
-        .query(
-            "SELECT image_id FROM products WHERE id = ?1 LIMIT 1",
-            params![product_id],
-        )
-        .await?;
-    let row = rows.next().await?.ok_or(AppError::ProductNotFound)?;
-    let current_image_id: Option<i64> = row.get(0)?;
-
-    if let Some(current_image_id) = current_image_id {
-        tx.execute(
-            "DELETE FROM images WHERE id = ?1",
-            params![current_image_id],
-        )
-        .await?;
-    }
-
     // insert image data
     let mut rows = tx
         .query(
-            "INSERT INTO images (content_type, image_data) VALUES (?1, ?2) RETURNING id",
-            params![content_type, image_bytes],
+            "INSERT INTO images (content_type, image_data, uploaded_by) VALUES (?1, ?2, ?3) RETURNING id",
+            params![content_type, image_bytes, user.id],
         )
         .await?;
 
     let row = rows.next().await?.ok_or(AppError::InsertFailed)?;
-    let new_image_id: i64 = row.get(0)?;
+    let image_id: i64 = row.get(0)?;
 
     // set the id of the new image of the product
     tx.execute(
-        "UPDATE products SET image_id = ?1 WHERE id = ?2",
-        params![new_image_id, product_id],
+        "INSERT INTO  product_images (product_id, image_id) VALUES (?1, ?2)",
+        params![product_id, image_id],
     )
     .await?;
 
     tx.commit().await?;
 
-    Ok((
-        StatusCode::CREATED,
-        Json(CreateResponse { id: new_image_id }),
-    ))
+    Ok((StatusCode::CREATED, Json(CreateResponse { id: image_id })))
 }
 
 pub fn use_routes() -> Router<AppState> {

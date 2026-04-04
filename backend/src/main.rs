@@ -1,5 +1,6 @@
 use axum::{Router, http::StatusCode, routing::get};
 use libsql::Builder;
+use libsql::params;
 use tokio::net::TcpListener;
 
 mod contracts;
@@ -14,6 +15,7 @@ mod utils;
 use crate::cors::get_cors_layer;
 use crate::env::get_env;
 use crate::error::AppError;
+use crate::utils::hash_password;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -39,7 +41,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         Ok(_) => println!("Schema applied successfully."),
         Err(e) => eprintln!("Transaction failed and rolled back: {}", e),
-    }
+    };
+
+    // create default user
+
+    db_conn
+        .execute(
+            "
+        INSERT INTO users (name, password_hash)
+        VALUES (?1, ?2)
+        ON CONFLICT (name) DO NOTHING;
+        ",
+            params!["admin", hash_password("1234")],
+        )
+        .await?;
 
     // build app state
     let app_state = AppState {

@@ -33,7 +33,7 @@ pub fn create_jwt(user_id: u64, secret_key: &str) -> Result<String, jsonwebtoken
         exp: expiration as usize,
     };
     encode(
-        &Header::new(Algorithm::HS512),
+        &Header::new(Algorithm::HS256),
         &claims,
         &EncodingKey::from_secret(secret_key.as_ref()),
     )
