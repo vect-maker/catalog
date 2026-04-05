@@ -4,7 +4,7 @@ use axum::{
     extract::{Multipart, Path, State},
     http::StatusCode,
     response::IntoResponse,
-    routing::{get, post},
+    routing::{delete, get, post},
 };
 use libsql::params;
 
@@ -54,6 +54,44 @@ async fn get_product_handler(
     Ok(Json(product))
 }
 
+async fn delete_product_handler(
+    user: AuthUser,
+    State(state): State<AppState>,
+    Path(product_id): Path<u32>,
+) -> Result<impl IntoResponse, AppError> {
+    let tx = state.db_conn.transaction().await?;
+
+    // delete associated images
+    tx.execute(
+        "
+        DELETE FROM images 
+        WHERE id IN  (
+           SELECT image_id FROM product_images WHERE product_id = (
+            SELECT id FROM products WHERE id = ?1 AND published_by = ?2
+           )
+        )
+            ",
+        params![product_id, user.id],
+    )
+    .await?;
+    // delete the product
+
+    let rows_affected = tx
+        .execute(
+            "DELETE FROM products WHERE id = ?1 AND published_by = ?2",
+            params![product_id, user.id],
+        )
+        .await?;
+
+    // check ownership
+    if rows_affected == 0 {
+        return Err(AppError::ProductNotFound);
+    }
+
+    tx.commit().await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
 async fn create_product_handler(
     user: AuthUser,
     State(state): State<AppState>,
@@ -99,12 +137,16 @@ pub async fn upload_image_handler(
     let row = rows.next().await?.ok_or(AppError::InsertFailed)?;
     let image_id: i64 = row.get(0)?;
 
-    // set the id of the new image of the product
-    tx.execute(
-        "INSERT INTO  product_images (product_id, image_id) VALUES (?1, ?2)",
-        params![product_id, image_id],
-    )
-    .await?;
+    let rows_affected = tx
+        .execute(
+            "INSERT INTO product_images (product_id, image_id) 
+            SELECT id, ?2 FROM products WHERE published_by = ?3 AND id = ?1",
+            params![product_id, image_id, user.id],
+        )
+        .await?;
+    if rows_affected == 0 {
+        return Err(AppError::ProductNotFound);
+    }
 
     tx.commit().await?;
 
@@ -117,4 +159,5 @@ pub fn use_routes() -> Router<AppState> {
         .route("/", post(create_product_handler))
         .route("/{product_id}", get(get_product_handler))
         .route("/{product_id}/images", post(upload_image_handler))
+        .route("/{product_id}", delete(delete_product_handler))
 }

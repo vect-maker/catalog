@@ -46,11 +46,6 @@ const processFiles = (rawFiles: File[] | FileList | null) => {
     emit('filesChanged', validFiles)
 }
 
-const cleanupUrls = () => {
-    previews.value.forEach(url => URL.revokeObjectURL(url))
-    previews.value = []
-}
-
 const onFileChange = (event: Event) => {
     const target = event.target as HTMLInputElement
     processFiles(target.files)
@@ -64,5 +59,18 @@ const { isOverDropZone } = useDropZone(dropZoneRef, {
     preventDefaultForUnhandled: false,
 })
 
+
+
+const cleanupUrls = () => {
+    previews.value.forEach(url => URL.revokeObjectURL(url))
+    previews.value = []
+   
+}
+
+defineExpose({
+    clearFiles: cleanupUrls
+})
+
 onBeforeUnmount(cleanupUrls)
+
 </script>
