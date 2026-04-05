@@ -14,4 +14,5 @@ image = { version = "0.25.10", default-features = false, features = ["webp", "jp
 tower-http = { version = "0.6.8", features = ["cors"] }
 jsonwebtoken = { version="10.3.0", features = ["rust_crypto"]}
 argon2 = "0.5.3"
+uuid = {version = "1.23.0", features = ["v7", "fast-rng"]}
 

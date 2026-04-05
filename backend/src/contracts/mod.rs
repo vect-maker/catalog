@@ -7,3 +7,8 @@ pub mod user_dto;
 pub struct CreateResponse {
     pub id: i64,
 }
+
+#[derive(Serialize)]
+pub struct CreateResponseId {
+    pub id: String,
+}

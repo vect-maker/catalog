@@ -7,7 +7,7 @@ pub struct ProductDto {
     pub title: String,
     pub description: Option<String>,
     pub price: f64,
-    pub images: Vec<u64>,
+    pub images: Vec<String>,
 }
 
 impl TryFrom<&Row> for ProductDto {
@@ -15,7 +15,7 @@ impl TryFrom<&Row> for ProductDto {
 
     fn try_from(row: &Row) -> Result<Self, Self::Error> {
         let image_ids_str: String = row.get(4)?;
-        let image_ids: Vec<u64> = serde_json::from_str(&image_ids_str).unwrap_or_default();
+        let image_ids: Vec<String> = serde_json::from_str(&image_ids_str).unwrap_or_default();
         Ok(Self {
             id: row.get(0)?,
             title: row.get(1)?,

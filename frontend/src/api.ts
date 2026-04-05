@@ -8,7 +8,7 @@ export const ProductSchema = z.object({
   title: z.string(),
   description: z.nullable(z.string()),
   price: z.number(),
-  images: z.array(z.number())
+  images: z.array(z.string())
 });
 
 export type Product = z.infer<typeof ProductSchema>;
@@ -24,6 +24,10 @@ export const ProductCreateSchema = z.object({
 })
 
 export const CreateResponseSchema = z.object({
+  id: z.number()
+})
+
+export const CreateResponseIdSchema = z.object({
   id: z.number()
 })
 
@@ -111,7 +115,7 @@ export const addImageToProduct = async (product_id: number, file: File) => {
 
   if (!response.ok) throw new Error("Upload failed");
 
-  return CreateResponseSchema.parse(await response.json())
+  return CreateResponseIdSchema.parse(await response.json())
 
 }
 

@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 
 CREATE TABLE IF NOT EXISTS images (
-  id INTEGER PRIMARY KEY,
+  id TEXT PRIMARY KEY,
   content_type TEXT NOT NULL,
   image_data BLOB NOT NULL,
   uploaded_by INTEGER NOT NULL,

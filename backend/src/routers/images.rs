@@ -11,7 +11,7 @@ use libsql::params;
 
 pub async fn get_image_handler(
     State(state): State<AppState>,
-    Path(image_id): Path<u32>,
+    Path(image_id): Path<String>,
 ) -> Result<impl IntoResponse, AppError> {
     let db_conn = state.db.connect()?;
 

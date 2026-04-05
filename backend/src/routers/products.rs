@@ -1,4 +1,4 @@
-use crate::{extractors::AuthUser, utils};
+use crate::{contracts::CreateResponseId, extractors::AuthUser, utils};
 use axum::{
     Json, Router,
     extract::{Multipart, Path, State},
@@ -133,22 +133,22 @@ pub async fn upload_image_handler(
 
     let tx = db_conn.transaction().await?;
 
+    let image_id = uuid::Uuid::now_v7().to_string();
+
     // insert image data
-    let mut rows = tx
-        .query(
-            "INSERT INTO images (content_type, image_data, uploaded_by) VALUES (?1, ?2, ?3) RETURNING id",
-            params![content_type, image_bytes, user.id],
+    tx
+        .execute(
+            "INSERT INTO images (id, content_type, image_data, uploaded_by) VALUES (?1, ?2, ?3, ?4)",
+            params![image_id.clone(), content_type, image_bytes, user.id],
         )
         .await?;
 
-    let row = rows.next().await?.ok_or(AppError::InsertFailed)?;
-    let image_id: i64 = row.get(0)?;
 
     let rows_affected = tx
         .execute(
             "INSERT INTO product_images (product_id, image_id) 
             SELECT id, ?2 FROM products WHERE published_by = ?3 AND id = ?1",
-            params![product_id, image_id, user.id],
+            params![product_id, image_id.clone(), user.id],
         )
         .await?;
     if rows_affected == 0 {
@@ -157,7 +157,7 @@ pub async fn upload_image_handler(
 
     tx.commit().await?;
 
-    Ok((StatusCode::CREATED, Json(CreateResponse { id: image_id })))
+    Ok((StatusCode::CREATED, Json(CreateResponseId { id: image_id })))
 }
 
 pub fn use_routes() -> Router<AppState> {
