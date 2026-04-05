@@ -11,3 +11,11 @@ button:focus {
     outline: none !important;
     box-shadow: none !important;
 }
+
+.vel-img {
+    transition: transform 0.05s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.vel-img-wrapper {
+    transition: transform 0.05s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}

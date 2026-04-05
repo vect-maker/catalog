@@ -19,8 +19,9 @@ use crate::{
 async fn get_products_handler(
     State(state): State<AppState>,
 ) -> Result<impl IntoResponse, AppError> {
-    let mut rows = state
-        .db_conn
+    let db_conn = state.db.connect()?;
+
+    let mut rows = db_conn
         .query(
             "SELECT id, title, description, price, COALESCE((SELECT json_group_array(image_id) FROM product_images WHERE product_id = p.id), '[]') AS image_ids FROM products AS p LIMIT 20",
             (),
@@ -40,8 +41,10 @@ async fn get_product_handler(
     State(state): State<AppState>,
     Path(product_id): Path<u32>,
 ) -> Result<impl IntoResponse, AppError> {
-    let mut rows = state
-        .db_conn
+   let db_conn = state.db.connect()?; 
+
+    let mut rows = 
+        db_conn
         .query(
             "SELECT id, title, description, price, COALESCE((SELECT json_group_array(image_id) FROM product_images WHERE product_id = p.id), '[]') AS image_ids FROM products AS p WHERE id = ?1 LIMIT 1",
             params![product_id],
@@ -59,7 +62,8 @@ async fn delete_product_handler(
     State(state): State<AppState>,
     Path(product_id): Path<u32>,
 ) -> Result<impl IntoResponse, AppError> {
-    let tx = state.db_conn.transaction().await?;
+    let db_conn = state.db.connect()?;
+    let tx = db_conn.transaction().await?;
 
     // delete associated images
     tx.execute(
@@ -97,8 +101,9 @@ async fn create_product_handler(
     State(state): State<AppState>,
     Json(payload): Json<CreateProductDto>,
 ) -> Result<impl IntoResponse, AppError> {
-    let mut rows = state
-        .db_conn
+    let db_conn = state.db.connect()?;
+
+    let mut rows = db_conn
         .query(
             "INSERT INTO products (title, description,  price,  published_by ) VALUES (?1, ?2, ?3, ?4) RETURNING id",
             params![payload.title, payload.description, payload.price, user.id],
@@ -124,7 +129,9 @@ pub async fn upload_image_handler(
     let content_type = "image/webp";
     let image_bytes = utils::convert_to_webp(field.bytes().await?).await?;
 
-    let tx = state.db_conn.transaction().await?;
+    let db_conn = state.db.connect()?;
+
+    let tx = db_conn.transaction().await?;
 
     // insert image data
     let mut rows = tx

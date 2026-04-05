@@ -11,32 +11,35 @@
                 </div>
                 <ul tabindex="-1"
                     class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-                    <li><RouterLink :to="{name: 'catalog'}">Catalogo</RouterLink></li>
-                    <li v-if="authStore.isAuthenticated"><RouterLink :to="{name: 'productCreate'}">Agregar producto</RouterLink></li>
-                    <li v-if="!authStore.isAuthenticated"><RouterLink :to="{name: 'login'}">Iniciar session</RouterLink></li>
-                     <li v-else><button @click="logout">Cerrar session</button></li>
+                    <li>
+                        <RouterLink :to="{ name: 'catalog' }">Catalogo</RouterLink>
+                    </li>
+                    <li v-if="authStore.isAuthenticated">
+                        <RouterLink :to="{ name: 'productCreate' }">Agregar producto</RouterLink>
+                    </li>
+                    <li v-if="!authStore.isAuthenticated">
+                        <RouterLink :to="{ name: 'login' }">Iniciar session</RouterLink>
+                    </li>
+                    <li v-else><button @click="logout">Cerrar session</button></li>
                     <li><a>Sobre nosotros</a></li>
                 </ul>
             </div>
         </div>
         <div class="navbar-center">
-            <RouterLink :to="{name: 'catalog'}" class="btn btn-ghost font-['Noto_Serif'] font-bold text-xl"> {{store_name }}</RouterLink>
+            <RouterLink :to="{ name: 'catalog' }" class="btn btn-ghost font-['Noto_Serif'] font-bold text-xl">
+                {{ store_name }}</RouterLink>
         </div>
         <div class="navbar-end">
             <button class="btn btn-ghost btn-circle">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <span class="material-symbols-outlined">
+                    search
+                </span>
             </button>
             <button class="btn btn-ghost btn-circle">
                 <div class="indicator">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
+                    <span class="material-symbols-outlined">
+                        notifications
+                    </span>
                     <span class="badge badge-xs badge-primary indicator-item"></span>
                 </div>
             </button>
@@ -54,9 +57,9 @@ const store_name = import.meta.env.VITE_STORE_NAME;
 const authStore = useAuthStore()
 const router = useRouter()
 
-const logout = ()=>{
+const logout = () => {
     authStore.logout();
-    router.push({"name": "catalog"})
+    router.push({ "name": "catalog" })
 }
 
 </script>

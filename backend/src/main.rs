@@ -1,6 +1,7 @@
 use axum::{Router, http::StatusCode, routing::get};
 use libsql::Builder;
 use libsql::params;
+use std::sync::Arc;
 use tokio::net::TcpListener;
 
 mod contracts;
@@ -19,7 +20,7 @@ use crate::utils::hash_password;
 
 #[derive(Clone)]
 pub struct AppState {
-    pub db_conn: libsql::Connection,
+    pub db: Arc<libsql::Database>,
     pub jwt_secret: String,
 }
 
@@ -58,7 +59,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // build app state
     let app_state = AppState {
-        db_conn,
+        db: Arc::new(db),
         jwt_secret: app_env.secret_key.clone(),
     };
 

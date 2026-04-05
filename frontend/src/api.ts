@@ -80,6 +80,21 @@ export const createProduct = async (formData: unknown) => {
 
 }
 
+export const deleteProduct = async (product_id: number) => {
+  const authStore = useAuthStore();
+
+  const response = await fetch(`${API_BASE_URL}/products/${product_id}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${authStore.token}`
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Server error: ${response.status}`);
+  }
+}
+
 export const addImageToProduct = async (product_id: number, file: File) => {
   const formData = new FormData();
   const authStore = useAuthStore();

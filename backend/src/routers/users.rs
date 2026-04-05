@@ -16,8 +16,9 @@ async fn authenticate_user_handler(
     State(state): State<AppState>,
     Json(payload): Json<AuthenticateUserDto>,
 ) -> Result<impl IntoResponse, AppError> {
-    let row = state
-        .db_conn
+    let db_conn = state.db.connect()?;
+
+    let row = db_conn
         .query(
             "SELECT id, password_hash FROM users WHERE name = ?1",
             params![payload.name],

@@ -11,6 +11,7 @@
     "npm:tailwindcss@^4.2.2": "4.2.2",
     "npm:typescript@~5.9.3": "5.9.3",
     "npm:vite@^8.0.1": "8.0.3_@types+node@24.12.0_@emnapi+core@1.9.1_@emnapi+runtime@1.9.1",
+    "npm:vue-easy-lightbox@^1.19.0": "1.19.0_vue@3.5.31__typescript@5.9.3",
     "npm:vue-router@^4.6.4": "4.6.4_vue@3.5.31__typescript@5.9.3",
     "npm:vue-tsc@^3.2.5": "3.2.6_typescript@5.9.3",
     "npm:vue@^3.5.30": "3.5.31_typescript@5.9.3",
@@ -719,6 +720,12 @@
     "vscode-uri@3.1.0": {
       "integrity": "sha512-/BpdSx+yCQGnCvecbyXdxHDkuk55/G3xwnC0GqY4gmQ3j+A+g8kzzgB4Nk/SINjqn6+waqw3EgbVF2QKExkRxQ=="
     },
+    "vue-easy-lightbox@1.19.0_vue@3.5.31__typescript@5.9.3": {
+      "integrity": "sha512-YxLXgjEn91UF3DuK1y8u3Pyx2sJ7a/MnBpkyrBSQkvU1glzEJASyAZ7N+5yDpmxBQDVMwCsL2VmxWGIiFrWCgA==",
+      "dependencies": [
+        "vue"
+      ]
+    },
     "vue-router@4.6.4_vue@3.5.31__typescript@5.9.3": {
       "integrity": "sha512-Hz9q5sa33Yhduglwz6g9skT8OBPii+4bFn88w6J+J4MfEo4KRRpmiNG/hHHkdbRFlLBOqxN8y8gf2Fb0MTUgVg==",
       "dependencies": [
@@ -766,6 +773,7 @@
         "npm:tailwindcss@^4.2.2",
         "npm:typescript@~5.9.3",
         "npm:vite@^8.0.1",
+        "npm:vue-easy-lightbox@^1.19.0",
         "npm:vue-router@^4.6.4",
         "npm:vue-tsc@^3.2.5",
         "npm:vue@^3.5.30",

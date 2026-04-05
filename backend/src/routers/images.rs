@@ -13,8 +13,9 @@ pub async fn get_image_handler(
     State(state): State<AppState>,
     Path(image_id): Path<u32>,
 ) -> Result<impl IntoResponse, AppError> {
-    let mut rows = state
-        .db_conn
+    let db_conn = state.db.connect()?;
+
+    let mut rows = db_conn
         .query(
             "SELECT content_type, image_data FROM images WHERE id = ?1 LIMIT 1",
             params![image_id],
