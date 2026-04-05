@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 pub struct ProductDto {
     pub id: u64,
     pub title: String,
-    pub description: String,
+    pub description: Option<String>,
     pub price: f64,
     pub images: Vec<u64>,
 }
@@ -29,6 +29,6 @@ impl TryFrom<&Row> for ProductDto {
 #[derive(Deserialize)]
 pub struct CreateProductDto {
     pub title: String,
-    pub description: String,
+    pub description: Option<String>,
     pub price: f64,
 }

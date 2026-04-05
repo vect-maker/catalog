@@ -34,7 +34,7 @@
 
                     <label class="fieldset">
                         <span class="label">Descripcion</span>
-                        <textarea v-model="description" :disabled="isUploading" minlength="4" maxlength="500" required class="textarea w-full"
+                        <textarea v-model="description" :disabled="isUploading" minlength="4" maxlength="500"  class="textarea w-full"
                             placeholder="Descripcion"></textarea>
                         <span class="validator-hint hidden">Debe de tener de 4 a 500 caracteres</span>
                     </label>
@@ -94,7 +94,7 @@ const createProduct = async () => {
         const product = await createProductRequest({
             title: title.value,
             price: price.value,
-            description: description.value
+            description: description.value.length < 1 ? null : description.value
         })
         const uploadPromises = productImages.value.map(imageFile =>
             addImageToProduct(product.id, imageFile)

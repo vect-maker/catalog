@@ -6,7 +6,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
 export const ProductSchema = z.object({
   id: z.number(),
   title: z.string(),
-  description: z.string(),
+  description: z.nullable(z.string()),
   price: z.number(),
   images: z.array(z.number())
 });
@@ -19,7 +19,7 @@ export type ProductList = z.infer<typeof ProductListSchema>;
 
 export const ProductCreateSchema = z.object({
   title: z.string().min(4).max(40),
-  description: z.string().min(4).max(500),
+  description: z.nullable(z.string().min(4).max(500)),
   price: z.number().positive(),
 })
 
