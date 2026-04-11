@@ -1,6 +1,7 @@
 use axum::{Router, http::StatusCode, routing::get};
 use libsql::Builder;
 use libsql::params;
+use std::net::Ipv4Addr;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 
@@ -14,7 +15,7 @@ mod shutdown;
 mod utils;
 
 use crate::cors::get_cors_layer;
-use crate::env::get_env;
+use crate::env::AppEnv;
 use crate::error::AppError;
 use crate::utils::hash_password;
 
@@ -27,7 +28,7 @@ pub struct AppState {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // get app env
-    let app_env = get_env();
+    let app_env = AppEnv::load();
     // create datbase
     let db = Builder::new_remote(app_env.db_url, app_env.db_token)
         .build()
@@ -73,7 +74,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .with_state(app_state)
         .layer(get_cors_layer(&app_env.client_url));
 
-    let listener = TcpListener::bind("0.0.0.0:80").await?;
+    let listener = TcpListener::bind((Ipv4Addr::UNSPECIFIED, app_env.port)).await?;
     println!("server running on http://{}", listener.local_addr()?);
 
     axum::serve(listener, app)

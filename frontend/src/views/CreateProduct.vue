@@ -51,6 +51,9 @@
 import { ref } from 'vue';
 import DropZone from '../components/DropZone.vue';
 import { createProduct as createProductRequest, addImageToProduct } from '../api';
+import { useAlertStore } from '../stores/useAlertStore';
+
+const alertStore = useAlertStore()
 
 const cropSizeLimit = 1024 * 1024
 const title = ref("");
@@ -101,8 +104,9 @@ const createProduct = async () => {
         );
 
         const uploadedImages = await Promise.all(uploadPromises);
-
         console.log(uploadedImages)
+
+        alertStore.pushAlert("Se publico el producto correctamente")
 
     } catch (error) {
         console.error(error);

@@ -28,7 +28,7 @@ export const CreateResponseSchema = z.object({
 })
 
 export const CreateResponseIdSchema = z.object({
-  id: z.number()
+  id: z.string()
 })
 
 export const AuthenticateUserSchema = z.object({
@@ -42,7 +42,7 @@ export const AuthenticationToken = z.object({
 
 
 // handlers 
-export const getImageUrl = (imageId: number) => {
+export const getImageUrl = (imageId: string) => {
   return `${API_BASE_URL}/images/${imageId}`
 }
 

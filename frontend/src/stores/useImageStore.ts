@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 
-export const useImageStore = defineStore('alert', () => {
+export const useImageStore = defineStore('image', () => {
     const showLightbox = ref(false);
 
     const images = ref<string[]>([]);
