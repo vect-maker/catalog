@@ -73,6 +73,10 @@ pub fn verify_password(password: &str, stored_hash: &str) -> Result<(), AppError
 }
 
 pub async fn convert_to_webp(raw_bytes: Bytes) -> Result<Vec<u8>, AppError> {
+    if let Ok(ImageFormat::WebP) = image::guess_format(&raw_bytes) {
+        return Ok(raw_bytes.to_vec());
+    }
+
     let webp_bytes = task::spawn_blocking(move || {
         let img = image::load_from_memory(&raw_bytes).map_err(|_| AppError::InvalidImageFormat)?;
 
@@ -85,6 +89,7 @@ pub async fn convert_to_webp(raw_bytes: Bytes) -> Result<Vec<u8>, AppError> {
     })
     .await
     .map_err(|_| AppError::ThreadPanic)??;
+
     Ok(webp_bytes)
 }
 

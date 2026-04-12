@@ -1,49 +1,77 @@
 <template>
-    <label ref="dropZoneRef"
-        class="flex min-h-64 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-base-300 bg-base-200 p-4 overflow-hidden relative"
-        :class="{ 'border-primary bg-base-300 transition-colors': isOverDropZone }">
-        
-        <div v-if="!previews.length" class="flex flex-col items-center justify-center pb-6 pt-5 p-2 pointer-events-none">
-            <p class="mb-2 text-sm text-base-content/70">
-                <span class="font-semibold text-center">Haz click para cargar imágenes</span> 
-                o arrastra y suelta
-            </p>
-            <p class="text-xs text-base-content/60">PNG, JPG, WEBP</p>
-        </div>
+    <label 
+        ref="dropZoneRef"
+        class="w-full aspect-square flex justify-center items-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-100 transition-colors"  
+        :class="{ 'border-primary bg-base-300': isOverDropZone }"
+    >
+        <span class="material-symbols-outlined text-gray-400 text-3xl">add</span>
+        <input 
+            type="file" 
+            accept="image/png,image/jpeg,image/webp" 
+            class="hidden" 
+            @change="onFileChange" 
+            :disabled="isCropping"
+        />
+    </label>
 
-        <div v-else class="grid grid-cols-3 sm:grid-cols-4 gap-4 w-full h-full overflow-y-auto pointer-events-none">
-            <div v-for="url in previews" :key="url" class="relative aspect-square">
-                <img :src="url" alt="preview" class="w-full h-full object-cover rounded shadow-md" />
+    <Teleport to="body">
+        <div v-if="isCropping" class="fixed inset-0 z-100 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+            <div class="bg-base-100 w-full max-w-2xl rounded-xl overflow-hidden shadow-2xl flex flex-col">
+                
+                <div class="p-4 border-b border-base-300 flex justify-between items-center">
+                    <h3 class="font-bold text-lg">Recortar Imagen</h3>
+                    <button type="button" @click="cancelCrop" class="btn btn-sm btn-circle btn-ghost">
+                        <span class="material-symbols-outlined text-sm">close</span>
+                    </button>
+                </div>
+                
+                <div class="w-full h-[60vh] bg-neutral">
+                    <Cropper
+                        ref="cropperRef"
+                        class="w-full h-full"
+                        :src="tempImageUrl"
+                        :stencil-props="{ aspectRatio: 1 }" 
+                    />
+                </div>
+
+                <div class="p-4 flex justify-end gap-3 bg-base-200">
+                    <button type="button" @click="cancelCrop" class="btn btn-ghost">Cancelar</button>
+                    <button type="button" @click="confirmCrop" class="btn btn-primary" :disabled="isProcessing">
+                        <span v-if="isProcessing" class="loading loading-spinner loading-sm"></span>
+                        Agregar Imagen
+                    </button>
+                </div>
             </div>
         </div>
-
-        <input id="dropzone-file" type="file" multiple accept="image/png,image/jpeg,image/webp" class="hidden"
-            @change="onFileChange" />
-    </label>
+    </Teleport>
 </template>
 
 <script setup lang="ts">
 import { useDropZone } from '@vueuse/core'
-import { onBeforeUnmount, ref } from 'vue'
+import { ref } from 'vue'
+import { Cropper } from 'vue-advanced-cropper'
+import 'vue-advanced-cropper/dist/style.css'; 
 
 const emit = defineEmits<{
-      (e: 'filesChanged', payload: File[]): void
+    (e: 'fileChanged', payload: File): void
 }>()
 
-const dropZoneRef = ref<HTMLDivElement>()
-const previews = ref<string[]>([]) 
+const dropZoneRef = ref<HTMLLabelElement>()
+
+// Cropper State
+const isCropping = ref(false)
+const isProcessing = ref(false)
+const tempImageUrl = ref<string>('')
+const cropperRef = ref<InstanceType<typeof Cropper> | null>(null)
 
 const processFiles = (rawFiles: File[] | FileList | null) => {
-    if (!rawFiles) return
+    if (!rawFiles || rawFiles.length === 0) return
 
-    const validFiles = Array.from(rawFiles).filter(file => file.type.startsWith('image/'))
-    if (!validFiles.length) return
+    const validFile = Array.from(rawFiles).find(file => file.type.startsWith('image/'))
+    if (!validFile) return
 
-    cleanupUrls()
-
-    previews.value = validFiles.map(file => URL.createObjectURL(file))
-    
-    emit('filesChanged', validFiles)
+    tempImageUrl.value = URL.createObjectURL(validFile)
+    isCropping.value = true
 }
 
 const onFileChange = (event: Event) => {
@@ -54,23 +82,39 @@ const onFileChange = (event: Event) => {
 
 const { isOverDropZone } = useDropZone(dropZoneRef, {
     onDrop: processFiles,
-    dataTypes: ['image/png', 'image/jpeg', 'image/webp'], 
-    multiple: true, 
+    dataTypes: ['image/png', 'image/jpeg', 'image/webp'],
+    multiple: false, 
     preventDefaultForUnhandled: false,
 })
 
+const confirmCrop = () => {
+    if (!cropperRef.value) return
+    isProcessing.value = true
 
-
-const cleanupUrls = () => {
-    previews.value.forEach(url => URL.revokeObjectURL(url))
-    previews.value = []
-   
+    const { canvas } = cropperRef.value.getResult()
+    
+    if (canvas) {
+        canvas.toBlob((blob) => {
+            if (blob) {
+                const croppedFile = new File([blob], `product-${Date.now()}.webp`, { type: 'image/webp' })
+                
+                emit('fileChanged', croppedFile)
+                cleanup()
+            }
+        }, 'image/webp', 0.8) 
+    }
 }
 
-defineExpose({
-    clearFiles: cleanupUrls
-})
+const cancelCrop = () => {
+    cleanup()
+}
 
-onBeforeUnmount(cleanupUrls)
-
+const cleanup = () => {
+    isCropping.value = false
+    isProcessing.value = false
+    if (tempImageUrl.value) {
+        URL.revokeObjectURL(tempImageUrl.value)
+        tempImageUrl.value = ''
+    }
+}
 </script>

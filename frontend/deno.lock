@@ -11,6 +11,7 @@
     "npm:tailwindcss@^4.2.2": "4.2.2",
     "npm:typescript@~5.9.3": "5.9.3",
     "npm:vite@^8.0.1": "8.0.3_@types+node@24.12.0_@emnapi+core@1.9.1_@emnapi+runtime@1.9.1",
+    "npm:vue-advanced-cropper@^2.8.9": "2.8.9_vue@3.5.31__typescript@5.9.3",
     "npm:vue-easy-lightbox@^1.19.0": "1.19.0_vue@3.5.31__typescript@5.9.3",
     "npm:vue-router@^4.6.4": "4.6.4_vue@3.5.31__typescript@5.9.3",
     "npm:vue-tsc@^3.2.5": "3.2.6_typescript@5.9.3",
@@ -460,6 +461,9 @@
     "birpc@2.9.0": {
       "integrity": "sha512-KrayHS5pBi69Xi9JmvoqrIgYGDkD6mcSe/i6YKi3w5kekCLzrX4+nawcXqrj2tIp50Kw/mT/s3p+GVK0A0sKxw=="
     },
+    "classnames@2.5.1": {
+      "integrity": "sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow=="
+    },
     "copy-anything@4.0.5": {
       "integrity": "sha512-7Vv6asjS4gMOuILabD3l739tsaxFQmC+a7pLZm02zyvs8p977bL3zEgq3yDk5rn9B0PbYgIv++jmHcuUab4RhA==",
       "dependencies": [
@@ -472,8 +476,14 @@
     "daisyui@5.5.19": {
       "integrity": "sha512-pbFAkl1VCEh/MPCeclKL61I/MqRIFFhNU7yiXoDDRapXN4/qNCoMxeCCswyxEEhqL5eiTTfwHvucFtOE71C9sA=="
     },
+    "debounce@1.2.1": {
+      "integrity": "sha512-XRRe6Glud4rd/ZGQfiV1ruXSfbvfJedlV9Y6zOlP+2K04vBYiJEte6stfFkCP03aMnY5tsipamumUjL14fofug=="
+    },
     "detect-libc@2.1.2": {
       "integrity": "sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ=="
+    },
+    "easy-bem@1.1.1": {
+      "integrity": "sha512-GJRqdiy2h+EXy6a8E6R+ubmqUM08BK0FWNq41k24fup6045biQ8NXxoXimiwegMQvFFV3t1emADdGNL1TlS61A=="
     },
     "enhanced-resolve@5.20.1": {
       "integrity": "sha512-Qohcme7V1inbAfvjItgw0EaxVX5q2rdVEZHRBrEQdRZTssLDGsL8Lwrznl8oQ/6kuTJONLaDcGjkNP247XEhcA==",
@@ -720,6 +730,15 @@
     "vscode-uri@3.1.0": {
       "integrity": "sha512-/BpdSx+yCQGnCvecbyXdxHDkuk55/G3xwnC0GqY4gmQ3j+A+g8kzzgB4Nk/SINjqn6+waqw3EgbVF2QKExkRxQ=="
     },
+    "vue-advanced-cropper@2.8.9_vue@3.5.31__typescript@5.9.3": {
+      "integrity": "sha512-1jc5gO674kVGpJKekoaol6ZlwaF5VYDLSBwBOUpViW0IOrrRsyLw6XNszjEqgbavvqinlKNS6Kqlom3B5M72Tw==",
+      "dependencies": [
+        "classnames",
+        "debounce",
+        "easy-bem",
+        "vue"
+      ]
+    },
     "vue-easy-lightbox@1.19.0_vue@3.5.31__typescript@5.9.3": {
       "integrity": "sha512-YxLXgjEn91UF3DuK1y8u3Pyx2sJ7a/MnBpkyrBSQkvU1glzEJASyAZ7N+5yDpmxBQDVMwCsL2VmxWGIiFrWCgA==",
       "dependencies": [
@@ -773,6 +792,7 @@
         "npm:tailwindcss@^4.2.2",
         "npm:typescript@~5.9.3",
         "npm:vite@^8.0.1",
+        "npm:vue-advanced-cropper@^2.8.9",
         "npm:vue-easy-lightbox@^1.19.0",
         "npm:vue-router@^4.6.4",
         "npm:vue-tsc@^3.2.5",
