@@ -15,9 +15,8 @@ mod shutdown;
 mod utils;
 
 use crate::cors::get_cors_layer;
-use crate::env::AppEnv;
+use crate::env::load_configs;
 use crate::error::AppError;
-use crate::utils::generate_uuid;
 use crate::utils::hash_password;
 
 #[derive(Clone)]
@@ -29,9 +28,9 @@ pub struct AppState {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // get app env
-    let app_env = AppEnv::load();
+    let (app_config, admin_config) = load_configs();
     // create datbase
-    let db = Builder::new_remote(app_env.db_url, app_env.db_token)
+    let db = Builder::new_remote(app_config.db_url, app_config.db_token)
         .build()
         .await?;
     let db_conn = db.connect()?;
@@ -47,7 +46,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     // create default user
-    let new_admin_id = generate_uuid();
 
     db_conn
         .execute(
@@ -56,14 +54,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         VALUES (?1, ?2, ?3)
         ON CONFLICT (name) DO NOTHING;
         ",
-            params![new_admin_id.clone(), "admin", hash_password("1234")],
+            params![
+                admin_config.admin_id.clone(),
+                admin_config.admin_user.clone(),
+                hash_password(&admin_config.admin_password)
+            ],
         )
         .await?;
 
     // build app state
     let app_state = AppState {
         db: Arc::new(db),
-        jwt_secret: app_env.secret_key.clone(),
+        jwt_secret: app_config.secret_key.clone(),
     };
 
     // compose app
@@ -74,9 +76,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .nest("/images", routers::images::use_routes())
         .nest("/users", routers::users::use_routes())
         .with_state(app_state)
-        .layer(get_cors_layer(&app_env.client_url));
+        .layer(get_cors_layer(&app_config.client_url));
 
-    let listener = TcpListener::bind((Ipv4Addr::UNSPECIFIED, app_env.port)).await?;
+    let listener = TcpListener::bind((Ipv4Addr::UNSPECIFIED, app_config.port)).await?;
     println!("server running on http://{}", listener.local_addr()?);
 
     axum::serve(listener, app)
