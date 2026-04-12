@@ -1,5 +1,5 @@
 import { useAuthStore } from '../stores/useAuthStore';
-import { AuthenticateUserSchema, AuthenticationToken, CreateResponseIdSchema, PaginatedProductsSchema, ProductCreateSchema } from './schemas';
+import { AuthenticateUserSchema, AuthenticationToken, CreateResponseIdSchema, PaginatedProductsSchema, ProductCreateSchema, ProductSchema } from './schemas';
 import { z } from 'zod';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -82,6 +82,15 @@ export const deleteProduct = async (product_id: string) => {
   if (!response.ok) {
     throw new Error(`Server error: ${response.status}`);
   }
+}
+
+export const getProduct = async (product_id: string) => {
+
+  const response = await fetch(`${API_BASE_URL}/products/${product_id}`)
+
+  if (!response.ok) return null
+
+  return ProductSchema.parse(await response.json())
 }
 
 export const addImageToProduct = async (product_id: string, file: File) => {

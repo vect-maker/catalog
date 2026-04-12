@@ -8,21 +8,13 @@
 
     <div class="flex flex-col gap-4 h-full max-h-[85vh] sm:max-h-none">
       <div class="relative w-full">
-        <input 
-          v-model.trim="searchQuery" 
-          type="text" 
-          inputmode="search" 
-          placeholder="Escribe para buscar..."
-          class="input input-bordered w-full pr-12 text-base focus:input-primary" 
-          :class="{ 'input-primary': isSearching }" 
-        />
-        
+        <input v-model.trim="searchQuery" type="text" inputmode="search" placeholder="Escribe para buscar..."
+          class="input input-bordered w-full pr-12 text-base focus:input-primary"
+          :class="{ 'input-primary': isSearching }" />
+
         <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-          <button 
-            v-if="searchQuery.length > 0" 
-            @click="clearSearch"
-            class="btn btn-ghost btn-circle btn-xs opacity-50 hover:opacity-100"
-          >
+          <button v-if="searchQuery.length > 0" @click="clearSearch"
+            class="btn btn-ghost btn-circle btn-xs opacity-50 hover:opacity-100">
             <span class="material-symbols-outlined text-sm">close</span>
           </button>
           <span v-if="isSearching" class="loading loading-spinner loading-xs text-primary mr-2"></span>
@@ -32,15 +24,10 @@
       <div class="flex-1 overflow-y-auto rounded-xl border border-base-300 bg-base-200/30">
         <ul v-if="results.length > 0" class="menu w-full p-0">
           <li v-for="product in results" :key="product.id" class="border-b border-base-200 last:border-0">
-            <a 
-              class="flex items-center gap-4 py-4 px-4 active:bg-base-300 transition-colors h-20 cursor-pointer"
-              @click.stop.prevent="handleProductClick(product)"
-            >
+            <button @click="handleProductClick(product.id)"
+              class="flex items-center gap-4 py-4 px-4 active:bg-base-300 transition-colors h-20 cursor-pointer">
               <div class="w-14 h-14 aspect-square shrink-0 rounded-lg overflow-hidden bg-base-100 shadow-sm">
-                <Image 
-                  :src="product.images?.[0] ? getImageUrl(product.images[0]) : null" 
-                  :alt="product.title" 
-                />
+                <Image :src="product.images?.[0] ? getImageUrl(product.images[0]) : null" :alt="product.title" />
               </div>
 
               <div class="flex flex-col flex-1 min-w-0">
@@ -49,7 +36,7 @@
               </div>
 
               <span class="material-symbols-outlined opacity-20">chevron_right</span>
-            </a>
+            </button>
           </li>
         </ul>
 
@@ -70,17 +57,16 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { getPaginatedProducts, getImageUrl } from '../api';
-import { useImageStore } from '../stores/useImageStore';
 import BaseModal from './BaseModal.vue';
 import Image from './Image.vue';
 import type { Product } from '../api/schemas';
+import { useRouter } from 'vue-router';
 
 const showSearch = ref(false);
 const searchQuery = ref('');
 const results = ref<Product[]>([]);
 const isSearching = ref(false);
-
-const imageStore = useImageStore();
+const router = useRouter();
 
 let debounceTimer: ReturnType<typeof setTimeout>;
 let abortController: AbortController | null = null;
@@ -109,17 +95,15 @@ const clearSearch = () => {
   if (abortController) abortController.abort();
 };
 
-const handleProductClick = (product: Product) => {
-  const imageUrls = product.images?.map(getImageUrl) || ["/missingImage.jpg"];
-  
-  imageStore.showImages(imageUrls, 0);
-  
-  showSearch.value = false;
-};
+const handleProductClick = (product_id: string) => {
+  showSearch.value = false
+  clearSearch()
+  router.push({ name: 'product', params: { product_id: product_id } })
+}
 
 watch(searchQuery, (newVal) => {
   clearTimeout(debounceTimer);
-  
+
   if (newVal.length === 0) {
     results.value = [];
     isSearching.value = false;
@@ -127,7 +111,7 @@ watch(searchQuery, (newVal) => {
   }
 
   isSearching.value = true;
-  debounceTimer = setTimeout(performSearch, 1000); 
+  debounceTimer = setTimeout(performSearch, 1000);
 });
 
 watch(showSearch, (isOpen) => {
@@ -136,4 +120,6 @@ watch(showSearch, (isOpen) => {
     clearTimeout(debounceTimer);
   }
 });
+
+
 </script>
