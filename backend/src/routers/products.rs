@@ -1,7 +1,11 @@
-use crate::{contracts::CreateResponseId, extractors::AuthUser, utils};
+use crate::{
+    contracts::{CreateResponseId, PaginationParams},
+    extractors::AuthUser,
+    utils,
+};
 use axum::{
     Json, Router,
-    extract::{Multipart, Path, State},
+    extract::{Multipart, Path, Query, State},
     http::StatusCode,
     response::IntoResponse,
     routing::{delete, get, post},
@@ -10,41 +14,39 @@ use libsql::params;
 
 use crate::{
     AppError, AppState,
-    contracts::{
-        product_dto::{CreateProductDto, ProductDto},
-    },
-    utils::generate_uuid
+    contracts::product_dto::{CreateProductDto, PaginatedProducts, ProductDto},
+    utils::generate_uuid,
 };
 
 async fn get_products_handler(
     State(state): State<AppState>,
+    Query(params): Query<PaginationParams>,
 ) -> Result<impl IntoResponse, AppError> {
     let db_conn = state.db.connect()?;
 
-    let mut rows = db_conn
+    let page_size = 20;
+    let limit = page_size + 1;
+    let offset = page_size * params.page;
+
+    let rows = db_conn
         .query(
-            "SELECT id, title, description, price, COALESCE((SELECT json_group_array(image_id) FROM product_images WHERE product_id = p.id), '[]') AS image_ids FROM products AS p LIMIT 20",
-            (),
+            "SELECT id, title, description, price, COALESCE((SELECT json_group_array(image_id) FROM product_images WHERE product_id = p.id), '[]') AS image_ids FROM products AS p  LIMIT ?1 OFFSET ?2",
+            params![limit, offset],
         )
         .await?;
 
-    let mut products: Vec<ProductDto> = Vec::new();
+    let paginated_products = PaginatedProducts::new(rows, params.page, page_size).await?;
 
-    while let Ok(Some(row)) = rows.next().await {
-        products.push(ProductDto::try_from(&row)?)
-    }
-
-    Ok(Json(products))
+    Ok(Json(paginated_products))
 }
 
 async fn get_product_handler(
     State(state): State<AppState>,
     Path(product_id): Path<String>,
 ) -> Result<impl IntoResponse, AppError> {
-   let db_conn = state.db.connect()?; 
+    let db_conn = state.db.connect()?;
 
-    let mut rows = 
-        db_conn
+    let mut rows = db_conn
         .query(
             "SELECT id, title, description, price, COALESCE((SELECT json_group_array(image_id) FROM product_images WHERE product_id = p.id), '[]') AS image_ids FROM products AS p WHERE id = ?1 LIMIT 1",
             params![product_id.clone()],
@@ -105,7 +107,6 @@ async fn create_product_handler(
 
     let product_id = generate_uuid();
 
-     
     let rows_affected = db_conn
         .execute(
             "INSERT INTO products (id, title, description,  price,  published_by ) VALUES (?1, ?2, ?3, ?4, ?5)",
@@ -119,7 +120,7 @@ async fn create_product_handler(
 
     Ok((
         StatusCode::CREATED,
-        Json(CreateResponseId { id: product_id  }),
+        Json(CreateResponseId { id: product_id }),
     ))
 }
 
@@ -140,13 +141,11 @@ pub async fn upload_image_handler(
     let image_id = generate_uuid();
 
     // insert image data
-    tx
-        .execute(
-            "INSERT INTO images (id, content_type, image_data, uploaded_by) VALUES (?1, ?2, ?3, ?4)",
-            params![image_id.clone(), content_type, image_bytes, user.id.clone()],
-        )
-        .await?;
-
+    tx.execute(
+        "INSERT INTO images (id, content_type, image_data, uploaded_by) VALUES (?1, ?2, ?3, ?4)",
+        params![image_id.clone(), content_type, image_bytes, user.id.clone()],
+    )
+    .await?;
 
     let rows_affected = tx
         .execute(

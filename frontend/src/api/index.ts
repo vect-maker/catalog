@@ -1,42 +1,8 @@
+import { useAuthStore } from '../stores/useAuthStore';
+import { AuthenticateUserSchema, AuthenticationToken, CreateResponseIdSchema, PaginatedProductsSchema, ProductCreateSchema } from './schemas';
 import { z } from 'zod';
-import { useAuthStore } from './stores/useAuthStore';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
-
-export const ProductSchema = z.object({
-  id: z.uuidv7(),
-  title: z.string(),
-  description: z.nullable(z.string()),
-  price: z.number(),
-  images: z.array(z.string())
-});
-
-export type Product = z.infer<typeof ProductSchema>;
-
-export const ProductListSchema = z.array(ProductSchema);
-export type ProductList = z.infer<typeof ProductListSchema>;
-
-
-export const ProductCreateSchema = z.object({
-  title: z.string().min(4).max(40),
-  description: z.nullable(z.string().min(4).max(500)),
-  price: z.number().positive(),
-})
-
-
-export const CreateResponseIdSchema = z.object({
-  id: z.uuidv7()
-})
-
-export const AuthenticateUserSchema = z.object({
-  name: z.string(),
-  password: z.string()
-})
-
-export const AuthenticationToken = z.object({
-  token: z.string()
-})
-
 
 // handlers 
 export const getImageUrl = (imageId: string) => {
@@ -52,6 +18,19 @@ export async function apiFetch<T>(path: string, schema: z.ZodSchema<T>): Promise
   const data = await response.json();
 
   return schema.parse(data);
+}
+
+export const getPaginatedProducts = async (page: number = 0) => {
+  const url = new URL(`${API_BASE_URL}/products`);
+  url.searchParams.append('page', String(page)); 
+
+  const response = await fetch(url);
+
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+  const data = await response.json();
+
+  return PaginatedProductsSchema.parse(data);
 }
 
 export const createProduct = async (formData: unknown) => {

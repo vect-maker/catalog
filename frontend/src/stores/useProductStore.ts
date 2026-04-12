@@ -1,15 +1,27 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { apiFetch, ProductListSchema, type ProductList } from "../api";
 import * as api from "../api"
+import {  type PaginatedProducts } from "../api/schemas";
 
 export const useProductStore = defineStore('product', () => {
-    const products = ref<ProductList>([]);
+    const paginatedProducts = ref<PaginatedProducts>();
 
-    const loadProducts = async () => {
-        products.value = await apiFetch("/products", ProductListSchema);
-
+    const loadProducts = async (page: number = 0) => {
+        paginatedProducts.value = await api.getPaginatedProducts(page);
     }
+
+    const nextProducts = async ()=>{
+        if (!paginatedProducts.value) return
+
+        await loadProducts(paginatedProducts.value.page + 1)
+    }
+
+    const previousProducts = async ()=>{
+        if (!paginatedProducts.value) return
+
+        await loadProducts(paginatedProducts.value.page - 1)
+    }
+
 
     const deleteProduct = async (product_id: string)=>{
         await api.deleteProduct(product_id);
@@ -17,8 +29,10 @@ export const useProductStore = defineStore('product', () => {
     }
 
     return {
-        products,
+        paginatedProducts,
         loadProducts,
-        deleteProduct
+        deleteProduct,
+        nextProducts,
+        previousProducts
     }
 })

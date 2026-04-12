@@ -1,6 +1,8 @@
 use libsql::Row;
 use serde::{Deserialize, Serialize};
 
+use crate::contracts::PaginatedItems;
+
 #[derive(Serialize)]
 pub struct ProductDto {
     pub id: String,
@@ -25,6 +27,8 @@ impl TryFrom<&Row> for ProductDto {
         })
     }
 }
+
+pub type PaginatedProducts = PaginatedItems<ProductDto>;
 
 #[derive(Deserialize)]
 pub struct CreateProductDto {

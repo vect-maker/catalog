@@ -29,7 +29,7 @@
 
                     <label class="fieldset">
                         <span class="label">Costo (CORDOBAS NI)</span>
-                        <input v-model="price" :disabled="isUploading" type="number" min="0"
+                        <input v-model="price" :disabled="isUploading" type="number" min="1"
                             class="input validator w-full" placeholder="Costo" required />
                         <span class="validator-hint hidden">Costo</span>
                     </label>

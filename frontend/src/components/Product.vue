@@ -64,11 +64,12 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { getImageUrl, type Product } from '../api';
+import { getImageUrl } from '../api';
 import { useAuthStore } from '../stores/useAuthStore';
 import { useProductStore } from '../stores/useProductStore';
 import { useAlertStore } from '../stores/useAlertStore';
 import { useImageStore } from '../stores/useImageStore';
+import type { Product } from '../api/schemas';
 
 
 const props = defineProps<{

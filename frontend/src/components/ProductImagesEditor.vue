@@ -5,10 +5,9 @@
             <img :src="url" alt="preview"
                 class="w-full h-full object-cover rounded-lg shadow-sm border border-gray-200" />
 
-            <button class="btn btn-sm top-2 right-2 absolute btn-error shadow-md"
-                @click.stop.prevent="removeFile(index)" type="button">
-                <span class="material-symbols-outlined">delete</span>
-            </button>
+            <button type="button" class="btn btn-error btn-sm top-2 right-2 absolute" aria-label="Editar producto"   @click.stop.prevent="removeFile(index)">
+          <span class="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
+        </button>
         </div>
 
         <DropZone @fileChanged="onFileAdded" />
