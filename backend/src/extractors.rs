@@ -8,7 +8,7 @@ use crate::utils::verify_jwt;
 
 #[derive(Clone)]
 pub struct AuthUser {
-    pub id: u64,
+    pub id: String,
 }
 
 impl FromRequestParts<AppState> for AuthUser {

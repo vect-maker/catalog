@@ -17,6 +17,7 @@ mod utils;
 use crate::cors::get_cors_layer;
 use crate::env::AppEnv;
 use crate::error::AppError;
+use crate::utils::generate_uuid;
 use crate::utils::hash_password;
 
 #[derive(Clone)]
@@ -46,15 +47,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     // create default user
+    let new_admin_id = generate_uuid();
 
     db_conn
         .execute(
             "
-        INSERT INTO users (name, password_hash)
-        VALUES (?1, ?2)
+        INSERT INTO users (id, name, password_hash)
+        VALUES (?1, ?2, ?3)
         ON CONFLICT (name) DO NOTHING;
         ",
-            params!["admin", hash_password("1234")],
+            params![new_admin_id.clone(), "admin", hash_password("1234")],
         )
         .await?;
 

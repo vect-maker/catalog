@@ -17,11 +17,14 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
-    pub sub: u64,
+    pub sub: String,
     pub exp: usize,
 }
 
-pub fn create_jwt(user_id: u64, secret_key: &str) -> Result<String, jsonwebtoken::errors::Error> {
+pub fn create_jwt(
+    user_id: String,
+    secret_key: &str,
+) -> Result<String, jsonwebtoken::errors::Error> {
     let expiration = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .expect("Time went backwards")

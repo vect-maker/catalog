@@ -75,7 +75,7 @@ async fn delete_product_handler(
            )
         )
             ",
-        params![product_id.clone(), user.id],
+        params![product_id.clone(), user.id.clone()],
     )
     .await?;
     // delete the product
@@ -83,7 +83,7 @@ async fn delete_product_handler(
     let rows_affected = tx
         .execute(
             "DELETE FROM products WHERE id = ?1 AND published_by = ?2",
-            params![product_id.clone(), user.id],
+            params![product_id.clone(), user.id.clone()],
         )
         .await?;
 
@@ -109,7 +109,7 @@ async fn create_product_handler(
     let rows_affected = db_conn
         .execute(
             "INSERT INTO products (id, title, description,  price,  published_by ) VALUES (?1, ?2, ?3, ?4, ?5)",
-            params![product_id.clone(), payload.title, payload.description, payload.price, user.id],
+            params![product_id.clone(), payload.title, payload.description, payload.price, user.id.clone()],
         )
         .await?;
 
@@ -143,7 +143,7 @@ pub async fn upload_image_handler(
     tx
         .execute(
             "INSERT INTO images (id, content_type, image_data, uploaded_by) VALUES (?1, ?2, ?3, ?4)",
-            params![image_id.clone(), content_type, image_bytes, user.id],
+            params![image_id.clone(), content_type, image_bytes, user.id.clone()],
         )
         .await?;
 
@@ -152,7 +152,7 @@ pub async fn upload_image_handler(
         .execute(
             "INSERT INTO product_images (product_id, image_id) 
             SELECT id, ?2 FROM products WHERE published_by = ?3 AND id = ?1",
-            params![product_id.clone(), image_id.clone(), user.id],
+            params![product_id.clone(), image_id.clone(), user.id.clone()],
         )
         .await?;
     if rows_affected == 0 {

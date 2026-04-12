@@ -28,7 +28,7 @@ async fn authenticate_user_handler(
         .await?
         .ok_or(AppError::InvalidCredentials)?;
 
-    let user_id: u64 = row.get(0)?;
+    let user_id: String = row.get(0)?;
     let stored_hash: String = row.get(1)?;
 
     verify_password(&payload.password, &stored_hash)?;
