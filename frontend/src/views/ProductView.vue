@@ -112,6 +112,8 @@ const authStore = useAuthStore();
 const imageStore = useImageStore();
 const productStore = useProductStore();
 const router = useRouter()
+const storePhone = import.meta.env.VITE_STORE_PHONE_NUMBER;
+
 
 const product = ref<Product | null>(null);
 const loading = ref(true);
@@ -134,12 +136,18 @@ const fetchProductDetails = async () => {
         loading.value = false;
     }
 };
-const whatsappLink = computed(() => {
-    if (!product.value) return '#';
-    const text = encodeURIComponent(`¡Hola! Tengo una pregunta sobre el producto: ${product.value.title} (SKU: ${product.value.id}). ¿Está disponible?`);
-    return `https://wa.me/50582403568?text=${text}`;
-});
 
+const whatsappLink = computed(() => {
+    if (!product.value || !storePhone) return '#';
+
+    const productUrl = `${window.location.origin}/products/${product.value.id}`;
+    
+    const message = `¡Hola! Tengo una pregunta sobre el producto: ${product.value.title}.\n\n` +
+                    `Puedes verlo aquí: ${productUrl}\n\n` +
+                    `¿Está disponible?`;
+
+    return `https://wa.me/${storePhone}?text=${encodeURIComponent(message)}`;
+});
 const openGallery = (index: number) => {
     if (!product.value?.images || product.value.images.length === 0) {
         imageStore.showImages(['/missingImage.jpg'], 0);
