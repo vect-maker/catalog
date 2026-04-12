@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize)]
 pub struct ProductDto {
-    pub id: u64,
+    pub id: String,
     pub title: String,
     pub description: Option<String>,
     pub price: f64,

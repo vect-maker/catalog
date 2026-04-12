@@ -82,7 +82,7 @@ const images = props.product.images?.map(getImageUrl) || [];
 const imageIndex = ref(0);
 const isImageLoaded = ref(false);
 
-const deleteProduct = (id: number) => {
+const deleteProduct = (id: string) => {
   productStore.deleteProduct(id)
   alertStore.pushAlert(`Se borro producto con id(${id})`)
 }

@@ -84,3 +84,7 @@ pub async fn convert_to_webp(raw_bytes: Bytes) -> Result<Vec<u8>, AppError> {
     .map_err(|_| AppError::ThreadPanic)??;
     Ok(webp_bytes)
 }
+
+pub fn generate_uuid() -> String {
+    uuid::Uuid::now_v7().to_string()
+}

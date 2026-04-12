@@ -11,7 +11,7 @@ export const useProductStore = defineStore('product', () => {
 
     }
 
-    const deleteProduct = async (product_id: number)=>{
+    const deleteProduct = async (product_id: string)=>{
         await api.deleteProduct(product_id);
         await loadProducts();
     }

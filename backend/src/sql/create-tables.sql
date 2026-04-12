@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS images (
 );
 
 CREATE TABLE IF NOT EXISTS products (
-  id INTEGER PRIMARY KEY,
+  id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
   description TEXT,
   price REAL NOT NULL, 
@@ -27,8 +27,8 @@ CREATE TABLE IF NOT EXISTS products (
 );
 
 CREATE TABLE IF NOT EXISTS product_images (
-  product_id INTEGER NOT NULL,
-  image_id INTEGER NOT NULL,
+  product_id TEXT NOT NULL,
+  image_id TEXT NOT NULL,
   display_order INTEGER DEFAULT 0,
 
   PRIMARY KEY (product_id, image_id),

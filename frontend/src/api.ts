@@ -4,7 +4,7 @@ import { useAuthStore } from './stores/useAuthStore';
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export const ProductSchema = z.object({
-  id: z.number(),
+  id: z.uuidv7(),
   title: z.string(),
   description: z.nullable(z.string()),
   price: z.number(),
@@ -23,12 +23,9 @@ export const ProductCreateSchema = z.object({
   price: z.number().positive(),
 })
 
-export const CreateResponseSchema = z.object({
-  id: z.number()
-})
 
 export const CreateResponseIdSchema = z.object({
-  id: z.string()
+  id: z.uuidv7()
 })
 
 export const AuthenticateUserSchema = z.object({
@@ -80,11 +77,11 @@ export const createProduct = async (formData: unknown) => {
     throw new Error(`Server error: ${response.status}`);
   }
 
-  return CreateResponseSchema.parse(await response.json())
+  return CreateResponseIdSchema.parse(await response.json())
 
 }
 
-export const deleteProduct = async (product_id: number) => {
+export const deleteProduct = async (product_id: string) => {
   const authStore = useAuthStore();
 
   const response = await fetch(`${API_BASE_URL}/products/${product_id}`, {
@@ -99,7 +96,7 @@ export const deleteProduct = async (product_id: number) => {
   }
 }
 
-export const addImageToProduct = async (product_id: number, file: File) => {
+export const addImageToProduct = async (product_id: string, file: File) => {
   const formData = new FormData();
   const authStore = useAuthStore();
 

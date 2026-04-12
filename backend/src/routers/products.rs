@@ -11,9 +11,9 @@ use libsql::params;
 use crate::{
     AppError, AppState,
     contracts::{
-        CreateResponse,
         product_dto::{CreateProductDto, ProductDto},
     },
+    utils::generate_uuid
 };
 
 async fn get_products_handler(
@@ -39,7 +39,7 @@ async fn get_products_handler(
 
 async fn get_product_handler(
     State(state): State<AppState>,
-    Path(product_id): Path<u32>,
+    Path(product_id): Path<String>,
 ) -> Result<impl IntoResponse, AppError> {
    let db_conn = state.db.connect()?; 
 
@@ -47,7 +47,7 @@ async fn get_product_handler(
         db_conn
         .query(
             "SELECT id, title, description, price, COALESCE((SELECT json_group_array(image_id) FROM product_images WHERE product_id = p.id), '[]') AS image_ids FROM products AS p WHERE id = ?1 LIMIT 1",
-            params![product_id],
+            params![product_id.clone()],
         )
         .await?;
     let row = rows.next().await?.ok_or(AppError::ProductNotFound)?;
@@ -60,7 +60,7 @@ async fn get_product_handler(
 async fn delete_product_handler(
     user: AuthUser,
     State(state): State<AppState>,
-    Path(product_id): Path<u32>,
+    Path(product_id): Path<String>,
 ) -> Result<impl IntoResponse, AppError> {
     let db_conn = state.db.connect()?;
     let tx = db_conn.transaction().await?;
@@ -75,7 +75,7 @@ async fn delete_product_handler(
            )
         )
             ",
-        params![product_id, user.id],
+        params![product_id.clone(), user.id],
     )
     .await?;
     // delete the product
@@ -83,7 +83,7 @@ async fn delete_product_handler(
     let rows_affected = tx
         .execute(
             "DELETE FROM products WHERE id = ?1 AND published_by = ?2",
-            params![product_id, user.id],
+            params![product_id.clone(), user.id],
         )
         .await?;
 
@@ -103,26 +103,30 @@ async fn create_product_handler(
 ) -> Result<impl IntoResponse, AppError> {
     let db_conn = state.db.connect()?;
 
-    let mut rows = db_conn
-        .query(
-            "INSERT INTO products (title, description,  price,  published_by ) VALUES (?1, ?2, ?3, ?4) RETURNING id",
-            params![payload.title, payload.description, payload.price, user.id],
+    let product_id = generate_uuid();
+
+     
+    let rows_affected = db_conn
+        .execute(
+            "INSERT INTO products (id, title, description,  price,  published_by ) VALUES (?1, ?2, ?3, ?4, ?5)",
+            params![product_id.clone(), payload.title, payload.description, payload.price, user.id],
         )
         .await?;
 
-    let row = rows.next().await?.ok_or(AppError::InsertFailed)?;
-    let new_product_id: i64 = row.get(0)?;
+    if rows_affected == 0 {
+        return Err(AppError::InsertFailed);
+    }
 
     Ok((
         StatusCode::CREATED,
-        Json(CreateResponse { id: new_product_id }),
+        Json(CreateResponseId { id: product_id  }),
     ))
 }
 
 pub async fn upload_image_handler(
     user: AuthUser,
     State(state): State<AppState>,
-    Path(product_id): Path<u32>,
+    Path(product_id): Path<String>,
     mut multipart: Multipart,
 ) -> Result<impl IntoResponse, AppError> {
     let field = multipart.next_field().await?.ok_or(AppError::MissingFile)?;
@@ -133,7 +137,7 @@ pub async fn upload_image_handler(
 
     let tx = db_conn.transaction().await?;
 
-    let image_id = uuid::Uuid::now_v7().to_string();
+    let image_id = generate_uuid();
 
     // insert image data
     tx
@@ -148,7 +152,7 @@ pub async fn upload_image_handler(
         .execute(
             "INSERT INTO product_images (product_id, image_id) 
             SELECT id, ?2 FROM products WHERE published_by = ?3 AND id = ?1",
-            params![product_id, image_id.clone(), user.id],
+            params![product_id.clone(), image_id.clone(), user.id],
         )
         .await?;
     if rows_affected == 0 {
