@@ -30,11 +30,7 @@
                 {{ store_name }}</RouterLink>
         </div>
         <div class="navbar-end">
-            <button class="btn btn-ghost btn-circle">
-                <span class="material-symbols-outlined">
-                    search
-                </span>
-            </button>
+            <Search></Search>
             <button class="btn btn-ghost btn-circle">
                 <div class="indicator">
                     <span class="material-symbols-outlined">
@@ -50,6 +46,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/useAuthStore';
+import Search from './Search.vue';
 
 
 const store_name = import.meta.env.VITE_STORE_NAME;

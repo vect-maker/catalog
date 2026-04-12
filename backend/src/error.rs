@@ -19,6 +19,7 @@ pub enum AppError {
     InvalidImageFormat,
     InvalidCredentials,
     InternalError,
+    BadRequest(&'static str),
 }
 
 impl IntoResponse for AppError {
@@ -51,6 +52,7 @@ impl IntoResponse for AppError {
                 eprintln!("--> [JWT ERROR] {}", err);
                 (StatusCode::UNAUTHORIZED, "Invalid credentials")
             }
+            AppError::BadRequest(err) => (StatusCode::BAD_REQUEST, err),
         };
 
         let body = Json(json!({ "error": error_message }));

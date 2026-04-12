@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::error::AppError;
 use libsql::{Row, Rows};
@@ -8,12 +8,6 @@ pub mod user_dto;
 #[derive(Serialize)]
 pub struct CreateResponseId {
     pub id: String,
-}
-
-#[derive(Deserialize)]
-pub struct PaginationParams {
-    #[serde(default)]
-    pub page: u32,
 }
 
 #[derive(Serialize)]

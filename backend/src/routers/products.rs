@@ -1,5 +1,5 @@
 use crate::{
-    contracts::{CreateResponseId, PaginationParams},
+    contracts::{CreateResponseId, product_dto::ProductQueryParams},
     extractors::AuthUser,
     utils,
 };
@@ -20,8 +20,10 @@ use crate::{
 
 async fn get_products_handler(
     State(state): State<AppState>,
-    Query(params): Query<PaginationParams>,
+    Query(params): Query<ProductQueryParams>,
 ) -> Result<impl IntoResponse, AppError> {
+    let search_term = params.q.unwrap_or_default();
+
     let db_conn = state.db.connect()?;
 
     let page_size = 20;
@@ -30,8 +32,8 @@ async fn get_products_handler(
 
     let rows = db_conn
         .query(
-            "SELECT id, title, description, price, COALESCE((SELECT json_group_array(image_id) FROM product_images WHERE product_id = p.id), '[]') AS image_ids FROM products AS p  LIMIT ?1 OFFSET ?2",
-            params![limit, offset],
+            "SELECT id, title, description, price, COALESCE((SELECT json_group_array(image_id) FROM product_images WHERE product_id = p.id), '[]') AS image_ids FROM products AS p WHERE title LIKE '%' || ?1 || '%' LIMIT ?2 OFFSET ?3",
+            params![search_term.clone(), limit, offset],
         )
         .await?;
 

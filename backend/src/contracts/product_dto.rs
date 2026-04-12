@@ -3,6 +3,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::contracts::PaginatedItems;
 
+#[derive(Deserialize)]
+pub struct ProductQueryParams {
+    pub q: Option<String>,
+    #[serde(default)]
+    pub page: u32,
+}
+
 #[derive(Serialize)]
 pub struct ProductDto {
     pub id: String,
