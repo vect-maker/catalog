@@ -1,4 +1,4 @@
-import { createMemoryHistory, createRouter } from 'vue-router'
+import {  createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from './stores/useAuthStore';
 
 const routes = [
@@ -9,7 +9,7 @@ const routes = [
 ]
 
 export const router = createRouter({
-  history: createMemoryHistory(),
+  history: createWebHistory(),
   routes,
 })
 

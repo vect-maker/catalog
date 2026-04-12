@@ -53,24 +53,25 @@
 import { ref } from 'vue';
 import { createProduct as createProductRequest, addImageToProduct } from '../api';
 import { useAlertStore } from '../stores/useAlertStore';
+import { useNotificationsStore } from '../stores/useNotificationsStore';
 import ProductImagesEditor from '../components/ProductImagesEditor.vue';
 
-const alertStore = useAlertStore()
+const alertStore = useAlertStore();
+const notificationsStore = useNotificationsStore();
 
-const cropSizeLimit = 1024 * 1024
+const cropSizeLimit = 1024 * 1024;
 const title = ref("");
 const price = ref(0);
 const description = ref("");
 const productImages = ref<File[]>([]);
 const isUploading = ref(false);
 
-
 const clearForm = () => {
     title.value = "";
     description.value = "";
     price.value = 0;
     productImages.value = []; 
-}
+};
 
 const createProduct = async () => {
     if (productImages.value.length < 1) {
@@ -86,7 +87,8 @@ const createProduct = async () => {
 
     try {
         isUploading.value = true;
-        
+        const productTitle = title.value; 
+
         const product = await createProductRequest({
             title: title.value,
             price: price.value,
@@ -99,13 +101,18 @@ const createProduct = async () => {
 
         await Promise.all(uploadPromises);
 
-        alertStore.pushAlert("Se publico el producto correctamente");
+        notificationsStore.push(
+            "Producto Publicado",
+            `El producto "${productTitle}" se ha subido correctamente al catálogo.`,
+            "success"
+        );
+
+        clearForm(); 
     } catch (error) {
         console.error(error);
-        alertStore.pushAlert("Error al publicar el producto");
+        alertStore.pushAlert("Error al publicar el producto. Verifique su conexión.");
     } finally {
-        clearForm();
         isUploading.value = false;
     }
-}
+};
 </script>

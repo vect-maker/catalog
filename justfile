@@ -70,21 +70,6 @@ build-frontend:
       deno run build
     
 
-build-container:
-  #!/usr/bin/env bash
-  set -euo pipefail
- 
-  podman build -t "ferlis:dev" -f - . <<EOF
-  FROM alpine:latest
-  RUN apk add --no-cache ca-certificates tzdata
-    
-  COPY backend/target/debug/backend /usr/local/bin/backend
-    
-  EXPOSE 80
-  CMD ["backend"]
-  EOF
-
-
 open-vs-frontend:
   code frontend
 enter: open-vs-frontend 

@@ -19,3 +19,4 @@ button:focus {
 .vel-img-wrapper {
     transition: transform 0.05s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
+

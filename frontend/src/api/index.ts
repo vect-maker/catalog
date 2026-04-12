@@ -1,6 +1,6 @@
 import { useAuthStore } from '../stores/useAuthStore';
 import { AuthenticateUserSchema, AuthenticationToken, CreateResponseIdSchema, PaginatedProductsSchema, ProductCreateSchema } from './schemas';
-import {  z } from 'zod';
+import { z } from 'zod';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -20,12 +20,17 @@ export async function apiFetch<T>(path: string, schema: z.ZodSchema<T>): Promise
   return schema.parse(data);
 }
 
+export const checkIfBackendReady = async () => {
+  const response = await fetch(`${API_BASE_URL}/health/ready`);
+  return response.ok
+}
+
 export const getPaginatedProducts = async (page: number = 0, q: string | null = null) => {
   const url = new URL(`${API_BASE_URL}/products`);
-  url.searchParams.append('page', String(page)); 
-  
-  if (q){
-    url.searchParams.append('q', q); 
+  url.searchParams.append('page', String(page));
+
+  if (q) {
+    url.searchParams.append('q', q);
   }
 
   const response = await fetch(url);
