@@ -1,16 +1,16 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from './stores/useAuthStore';
+import { useAuthStore } from './stores/useAuthStore.ts';
 
 const routes = [
-  { path: '/', name: "catalog", component: () => import('./views/Catalog.vue'), meta: { requiresAuth: false } },
+  {
+    path: '/', name: "catalog", component: () => import('./views/Catalog.vue'), meta: { requiresAuth: false }
+  },
   { path: '/products/create', name: "productCreate", component: () => import('./views/CreateProduct.vue'), meta: { requiresAuth: true } },
   { path: '/login', name: "login", component: () => import("./views/Login.vue"), meta: { requiresAuth: false } },
   {
     path: '/products/:product_id',
     name: "product", props: true, component: () => import("./views/ProductView.vue"), meta: { requiresAuth: false }
   }
-
-
 ]
 
 export const router = createRouter({

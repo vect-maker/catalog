@@ -49,11 +49,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     db_conn
         .execute(
-            "
-        INSERT INTO users (id, name, password_hash)
-        VALUES (?1, ?2, ?3)
-        ON CONFLICT (name) DO NOTHING;
-        ",
+            "INSERT OR IGNORE INTO users (id, name, password_hash) VALUES (?1, ?2, ?3);",
             params![
                 admin_config.admin_id.clone(),
                 admin_config.admin_user.clone(),
@@ -62,7 +58,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .await?;
 
-    // build app state
     let app_state = AppState {
         db: Arc::new(db),
         jwt_secret: app_config.secret_key.clone(),

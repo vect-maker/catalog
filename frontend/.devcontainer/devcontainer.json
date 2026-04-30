@@ -1,0 +1,19 @@
+{
+  "name": "HSK grammar",
+  "build": {
+    "dockerfile": "ContainerFile"
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "deno.enable": true,
+        "deno.lint": true,
+      },
+      "extensions": [
+        "denoland.vscode-deno",
+        "Vue.volar",
+        "bradlc.vscode-tailwindcss"
+      ]
+    }
+  }
+}

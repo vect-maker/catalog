@@ -20,7 +20,7 @@
         <button 
           class="join-item btn" 
           :disabled="productStore.paginatedProducts.page < 1"
-          @click="productStore.previousProducts()"
+          @click="setPage(productStore.paginatedProducts.page -1)"
         >«</button>
         <button class="join-item btn">
           Página {{ productStore.paginatedProducts.page + 1 }}
@@ -28,7 +28,7 @@
         <button 
           class="join-item btn" 
           :disabled="productStore.paginatedProducts.is_last"
-          @click="productStore.nextProducts()"
+          @click="setPage(productStore.paginatedProducts.page +1)"
         >»</button>
       </div>
     </template>
@@ -46,7 +46,7 @@
         </p>
       </div>
 
-      <button class="btn btn-outline" @click="productStore.loadProducts(0)">
+      <button class="btn btn-outline" @click="setPage(0)">
         <span class="material-symbols-outlined">first_page</span>
         Ir a la primera página
       </button>
@@ -55,13 +55,38 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 import Product from '../components/Product.vue';
 import { useProductStore } from '../stores/useProductStore';
+import { useRoute, useRouter } from 'vue-router';
 
 const productStore = useProductStore()
+const route = useRoute();
+const router = useRouter();
+
+const currentPage = computed(() => {
+  const p = route.query.p;
+  return p ? parseInt(p as string) : 0;
+});
+
+const setPage = (newPage: number) => {
+  router.push({
+    query: {
+      ...route.query,
+      p: newPage.toString()
+    }
+  });
+};
 
 onMounted(async () => {
-  await productStore.loadProducts()
+  await productStore.loadProducts(currentPage.value)
 })
+
+watch(
+  () => route.query.p,
+  (newPage) => {
+    const pageNumber = parseInt(newPage as string) || 0;
+    productStore.loadProducts(pageNumber);
+  }
+);
 </script>

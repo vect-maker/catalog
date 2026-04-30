@@ -1,0 +1,17 @@
+FROM docker.io/denoland/deno:bin AS deno-bin
+
+FROM docker.io/fedora:43
+
+RUN dnf install -y libicu && dnf clean all
+
+COPY --from=deno-bin /deno /usr/local/bin/deno
+
+RUN useradd -m deno && \
+    mkdir -p /deno-dir && \
+    chown -R deno:deno /deno-dir
+
+ENV DENO_DIR=/deno-dir
+USER deno
+WORKDIR /app
+
+ENTRYPOINT ["deno"]

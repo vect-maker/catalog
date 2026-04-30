@@ -31,11 +31,20 @@ async fn get_products_handler(
     let offset = page_size * params.page;
 
     let rows = db_conn
-        .query(
-            "SELECT id, title, description, price, COALESCE((SELECT json_group_array(image_id) FROM product_images WHERE product_id = p.id), '[]') AS image_ids FROM products AS p WHERE title LIKE '%' || ?1 || '%' LIMIT ?2 OFFSET ?3",
-            params![search_term.clone(), limit, offset],
-        )
-        .await?;
+    .query(
+        "
+        SELECT id, title, description, price, 
+        COALESCE((SELECT json_group_array(image_id) FROM product_images WHERE product_id = p.id), '[]') AS image_ids 
+        FROM products AS p 
+        WHERE title LIKE '%' || ?1 || '%' OR description LIKE '%' || ?1 || '%'
+        ORDER BY 
+            CASE WHEN title LIKE '%' || ?1 || '%' THEN 0 ELSE 1 END,
+            id DESC
+        LIMIT ?2 OFFSET ?3
+        ",
+        params![search_term.clone(), limit, offset],
+    )
+    .await?;
 
     let paginated_products = PaginatedProducts::new(rows, params.page, page_size).await?;
 

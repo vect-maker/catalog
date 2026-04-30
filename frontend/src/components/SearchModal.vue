@@ -24,19 +24,7 @@
       <div class="flex-1 overflow-y-auto rounded-xl border border-base-300 bg-base-200/30">
         <ul v-if="results.length > 0" class="menu w-full p-0">
           <li v-for="product in results" :key="product.id" class="border-b border-base-200 last:border-0">
-            <button @click="handleProductClick(product.id)"
-              class="flex items-center gap-4 py-4 px-4 active:bg-base-300 transition-colors h-20 cursor-pointer">
-              <div class="w-14 h-14 aspect-square shrink-0 rounded-lg overflow-hidden bg-base-100 shadow-sm">
-                <Image :src="product.images?.[0] ? getImageUrl(product.images[0]) : null" :alt="product.title" />
-              </div>
-
-              <div class="flex flex-col flex-1 min-w-0">
-                <span class="font-bold text-sm sm:text-base truncate">{{ product.title }}</span>
-                <span class="text-primary font-medium text-sm">C${{ product.price }}</span>
-              </div>
-
-              <span class="material-symbols-outlined opacity-20">chevron_right</span>
-            </button>
+            <ProductSearchResult @click="handleProductClick(product.id)" :product="product" :search-query="searchQuery"></ProductSearchResult>
           </li>
         </ul>
 
@@ -56,11 +44,11 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { getPaginatedProducts, getImageUrl } from '../api';
+import { getPaginatedProducts } from '../api';
 import BaseModal from './BaseModal.vue';
-import Image from './Image.vue';
 import type { Product } from '../api/schemas';
 import { useRouter } from 'vue-router';
+import ProductSearchResult from './ProductSearchResult.vue';
 
 const showSearch = ref(false);
 const searchQuery = ref('');
