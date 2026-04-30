@@ -21,7 +21,7 @@
           class="join-item btn" 
           :disabled="productStore.paginatedProducts.page < 1"
           @click="setPage(productStore.paginatedProducts.page -1)"
-        >«</button>
+        >< Anterior</button>
         <button class="join-item btn">
           Página {{ productStore.paginatedProducts.page + 1 }}
         </button>
@@ -29,7 +29,7 @@
           class="join-item btn" 
           :disabled="productStore.paginatedProducts.is_last"
           @click="setPage(productStore.paginatedProducts.page +1)"
-        >»</button>
+        >Siguiente ></button>
       </div>
     </template>
 

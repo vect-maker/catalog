@@ -66,7 +66,7 @@ run-frontend:
 build-frontend:
     podman --remote run --rm -it --init \
       --name catalog-frontend-builder \
-      -e VITE_API_URL="$API_URL" \
+      -e VITE_API_URL="$PROD_API_URL" \
       -e VITE_STORE_NAME="$STORE_NAME" \
       -e VITE_STORE_PHONE_NUMBER="$STORE_PHONE_NUMBER" \
       -v ./frontend:/app:Z \
