@@ -6,13 +6,17 @@
   "customizations": {
     "vscode": {
       "settings": {
-        "deno.enable": true,
-        "deno.lint": true,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "Vue.volar",
+        "tailwindCSS.experimental.classRegex": [
+          ["@plugin\\s+\"([^\"]*)\"", "\"([^\"]*)\""]
+        ]
       },
       "extensions": [
-        "denoland.vscode-deno",
         "Vue.volar",
-        "bradlc.vscode-tailwindcss"
+        "bradlc.vscode-tailwindcss",
+        "dbaeumer.vscode-eslint",
+        "ms-vscode.vscode-typescript-next"
       ]
     }
   }
