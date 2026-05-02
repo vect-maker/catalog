@@ -1,5 +1,6 @@
 <template>
-  <button class="btn btn-ghost btn-circle" @click="showSearch = true" aria-label="Abrir búsqueda">
+  <button data-cy="nav-search-btn" class="btn btn-ghost btn-circle" @click="showSearch = true"
+    aria-label="Abrir búsqueda">
     <span class="material-symbols-outlined">search</span>
   </button>
 
@@ -24,7 +25,8 @@
       <div class="flex-1 overflow-y-auto rounded-xl border border-base-300 bg-base-200/30">
         <ul v-if="results.length > 0" class="menu w-full p-0">
           <li v-for="product in results" :key="product.id" class="border-b border-base-200 last:border-0">
-            <ProductSearchResult @click="handleProductClick(product.id)" :product="product" :search-query="searchQuery"></ProductSearchResult>
+            <ProductSearchResult @click="handleProductClick(product.id)" :product="product" :search-query="searchQuery">
+            </ProductSearchResult>
           </li>
         </ul>
 
